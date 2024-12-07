@@ -1,7 +1,11 @@
 from customtkinter import *
 import tkinter as tk
 from PIL import Image
+import PantallaPrincipalAspirante
+import PantallaPrincipalEmpleado
 from Utilidades import *
+import conectarMySql
+import tkinter.messagebox as messagebox
 
 class MainLogin(CTkFrame):
     
@@ -88,7 +92,8 @@ class IngresoAspirante(CTkFrame):
     def __init__(self, parent, controller):
 
 
-        super().__init__(parent, fg_color="white") 
+        super().__init__(parent, fg_color="white")
+        self.controller = controller
 
         def volver():
             return controller.show_frame(MainLogin)
@@ -126,7 +131,7 @@ class IngresoAspirante(CTkFrame):
             fill="white"  # Color del texto
         )
 
-        usuario = CTkEntry(
+        self.usuario = CTkEntry(
             mitadDerecha,
             width=512,
             height=65,
@@ -137,7 +142,7 @@ class IngresoAspirante(CTkFrame):
             fg_color = "white",
             )
         
-        contrasena = CTkEntry(
+        self.contrasena = CTkEntry(
             mitadDerecha,
             width=512,
             height=65,
@@ -157,21 +162,50 @@ class IngresoAspirante(CTkFrame):
             text_color= "black",
             fg_color = "#02E1B5",
             hover_color = "#02E1B5",
+            command=self.verificar_login_aspirante #Funcionalidad boton
             )
       
         canvas.create_window(50, 122, window=botonBack, anchor="center", width=54, height = 54)
-        canvas.create_window(320, 280, window=usuario, anchor="center")
-        canvas.create_window(320, 380, window=contrasena, anchor="center")
+        canvas.create_window(320, 280, window=self.usuario, anchor="center")
+        canvas.create_window(320, 380, window=self.contrasena, anchor="center")
         canvas.create_window(320, 480, window=ingreso, anchor="center")        
         
+    def verificar_login_aspirante(self):
+        # Obtener los valores de los campos de texto (usuario y contraseña)
+        usuario = self.usuario.get()  # Suponiendo que usuario es un campo de texto
+        contrasena = self.contrasena.get()  # Suponiendo que contrasena es un campo de texto
 
+        # Conexion con la base de datos
+        conexion = conectarMySql.MiConexion()
+
+        # Verificar si el usuario existe en la base de datos
+        usuario_bd = conexion.busca_user_Aspirante(usuario)
+    
+        # Verificar si la contraseña es correcta para el usuario
+        if usuario_bd:
+            contrasena_bd = conexion.busca_password_Aspirante(contrasena)
+        
+        ##cambiar mensajes
+        
+            if contrasena_bd:
+                # Si el usuario y la contraseña son correctos
+                messagebox.showinfo("Login exitoso", "¡Bienvenido!")
+                return self.controller.show_frame(PantallaPrincipalAspirante.MenuPrincipalUsuario)
+                
+            else:
+                # Si la contraseña es incorrecta
+                messagebox.showerror("Error", "Usuario y/o contraseña incorrecta")
+        else:
+        # Si el usuario no existe
+            messagebox.showerror("Error", "Usuario y/o contraseña incorrecta")
 
 class IngresoEmpleados(CTkFrame):
     
     def __init__(self, parent, controller):
 
 
-        super().__init__(parent, fg_color="white") 
+        super().__init__(parent, fg_color="white")
+        self.controller = controller 
 
         def volver():
             return controller.show_frame(MainLogin)
@@ -215,7 +249,7 @@ class IngresoEmpleados(CTkFrame):
             fill="white"  # Color del texto
         )
 
-        usuario = CTkEntry(
+        self.usuario = CTkEntry(
             mitadDerecha,
             width=512,
             height=65,
@@ -226,7 +260,7 @@ class IngresoEmpleados(CTkFrame):
             fg_color = "white",
             )
         
-        contrasena = CTkEntry(
+        self.contrasena = CTkEntry(
             mitadDerecha,
             width=512,
             height=65,
@@ -241,14 +275,45 @@ class IngresoEmpleados(CTkFrame):
             self,
             width=512,
             height=65,
-            text= "Ingresar",
-            font= ("Labrada", 27),
-            text_color= "black",
-            fg_color = "#02E1B5",
-            hover_color = "#02E1B5",
-            )
-      
-        canvas.create_window(50, 122, window=botonBack, anchor="center", width=54, height = 54)
-        canvas.create_window(320, 280, window=usuario, anchor="center")
-        canvas.create_window(320, 380, window=contrasena, anchor="center")
-        canvas.create_window(320, 480, window=ingreso, anchor="center") 
+            text="Ingresar",
+            font=("Labrada", 27),
+            text_color="black",
+            fg_color="#02E1B5",
+            hover_color="#02E1B5",
+            command=self.verificar_login_empleado  # Funcionalidad boton
+        )
+
+        canvas.create_window(50, 122, window=botonBack, anchor="center", width=54, height=54)
+        canvas.create_window(320, 280, window=self.usuario, anchor="center")
+        canvas.create_window(320, 380, window=self.contrasena, anchor="center")
+        canvas.create_window(320, 480, window=ingreso, anchor="center")
+
+    def verificar_login_empleado(self):
+        # Obtener los valores de los campos de texto (usuario y contraseña)
+        usuario = self.usuario.get()  # Suponiendo que usuario es un campo de texto
+        contrasena = self.contrasena.get()  # Suponiendo que contrasena es un campo de texto
+
+        # Conexion con la base de datos
+        conexion = conectarMySql.MiConexion()
+
+        # Verificar si el usuario existe en la base de datos
+        usuario_bd = conexion.busca_user_Empleado(usuario)
+    
+        # Verificar si la contraseña es correcta para el usuario
+        if usuario_bd:
+            contrasena_bd = conexion.busca_password_Empleado(contrasena)
+        
+        ##cambiar mensajes
+
+            if contrasena_bd:
+                # Si el usuario y la contraseña son correctos
+                messagebox.showinfo("Login exitoso", "¡Bienvenido!")
+                return self.controller.show_frame(PantallaPrincipalEmpleado.MenuPrincipalUsuario)
+                
+            else:
+                # Si la contraseña es incorrecta
+                messagebox.showerror("Error", "Usuario y/o contraseña incorrecta")
+        else:
+        # Si el usuario no existe
+            messagebox.showerror("Error", "Usuario y/o contraseña incorrecta")
+
