@@ -190,6 +190,7 @@ class IngresoAspirante(CTkFrame):
             if contrasena_bd:
                 # Si el usuario y la contraseña son correctos
                 messagebox.showinfo("Login exitoso", "¡Bienvenido!")
+                sesionActual.sesionActualAspirante.crearSesion(usuario, contrasena)
                 return self.controller.show_frame(PantallaPrincipalAspirante.MenuPrincipalUsuario)
                 
             else:
@@ -308,6 +309,7 @@ class IngresoEmpleados(CTkFrame):
             if contrasena_bd:
                 # Si el usuario y la contraseña son correctos
                 messagebox.showinfo("Login exitoso", "¡Bienvenido!")
+                sesionActual.sesionActualEmpleado.crearSesion(usuario, contrasena)
                 return self.controller.show_frame(PantallaPrincipalEmpleado.MenuPrincipalUsuario)
                 
             else:
