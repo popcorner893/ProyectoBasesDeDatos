@@ -3,6 +3,7 @@ import tkinter as tk
 from PIL import Image
 import PantallaPrincipalAspirante
 import PantallaPrincipalEmpleado
+import sesionActual
 from Utilidades import *
 import conectarMySql
 import tkinter.messagebox as messagebox
