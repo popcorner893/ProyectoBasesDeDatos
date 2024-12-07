@@ -9,18 +9,18 @@ class sesionActualAspirante:
     cargos = ""
     concursos = ""
     convocatoria = ""
-
    
     @classmethod
     def crearSesion(self, username, password):
+        conexion = conectarMySql.MiConexion()
         sesionActualAspirante.username = username
         sesionActualAspirante.password = password
-        sesionActualAspirante.nombre = conectarMySql.MiConexion.get_full_name_aspirante(username)
-        sesionActualAspirante.cargos = conectarMySql.MiConexion.get_cargos_postulado(username)
-        sesionActualAspirante.convocatoria = conectarMySql.MiConexion.get_convocatoria_postulado(username)
+        sesionActualAspirante.nombre = conexion.get_full_name_aspirante(username)
+        sesionActualAspirante.cargos = conexion.get_cargos_postulado(username)
+        sesionActualAspirante.convocatoria = conexion.get_convocatoria_postulado(username)
         
     @classmethod
-    def cerrarSesion(cls, clave):
+    def cerrarSesion():
         sesionActualAspirante.username = ""
         sesionActualAspirante.password = ""
         sesionActualAspirante.nombre = ""
@@ -37,17 +37,17 @@ class sesionActualEmpleado:
     
     @classmethod
     def crearSesion(self, username, password):
+        conexion = conectarMySql.MiConexion()
         sesionActualEmpleado.username = username
         sesionActualEmpleado.password = password
-        sesionActualEmpleado.nombre = conectarMySql.MiConexion.get_full_name_empleado(username)
-        sesionActualEmpleado.nivelAceso = conectarMySql.MiConexion.get_nivel_Acceso(username)
+        sesionActualEmpleado.nombre = conexion.get_full_name_empleado(username)
+        sesionActualEmpleado.nivelAceso = conexion.get_nivel_Acceso(username)
 
     @classmethod
-    def cerrarSesion(cls, clave):
+    def cerrarSesion():
         sesionActualEmpleado.username = ""
         sesionActualEmpleado.password = ""
         sesionActualEmpleado.nombre = ""
         sesionActualEmpleado.cargos = ""
         sesionActualEmpleado.concursos = ""
         sesionActualEmpleado.convocatoria = ""  
-    
