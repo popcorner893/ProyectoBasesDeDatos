@@ -1,9 +1,10 @@
 from customtkinter import *
 import tkinter as tk
+import tkinter.messagebox
 from PIL import Image
 from Utilidades import *
 import Login, PantallaPerfil, Convocatoria, EvaluarInscripciones, Reclamaciones, RealizarEvaluacion, GestionUsuarios, FinalizarConvocatoria
-
+import sesionActual
 
 class MenuPrincipalUsuario(CTkFrame):
 
@@ -12,23 +13,11 @@ class MenuPrincipalUsuario(CTkFrame):
         super().__init__(parent, fg_color="white") 
 
         self.controller = controller
-        
-        self.columnconfigure((0,1), weight=1)
-        self.rowconfigure(0, weight=1)
-
-
-
-        # Crear canvas para manejar la imagen y el texto
-        canvas = tk.Canvas(self, width=640, height=721, highlightthickness=0)
-        canvas.pack(fill="both", expand=True)
-
-        #Imagen de Fondo
-        self.img_fondo = tk.PhotoImage(file="FondoDegradadoMain.png")  # Mantener referencia a la imagen
-        canvas.create_image(0, 0, image=self.img_fondo, anchor="nw")  # Colocar la imagen en la esquina superior izquierda     
-
+        imagenFondo = icono(self, "FondoDegradadoMain", 1280, 720)
+        imagenFondo.place(relx = 0, rely = 0, anchor = "nw")    
 
         frameBlancoFondo = CTkFrame(
-            canvas,
+            self,
             bg_color= "white",
             fg_color= "white",
             corner_radius=20,
@@ -64,14 +53,18 @@ class MenuPrincipalUsuario(CTkFrame):
 
         #Ícono para volver atrás
         iconBack = CTkImage(dark_image= Image.open("BackSymbol1.png"), size = (51,51))
-        img_lab1 = CTkButton(panelUsuario, image=iconBack, text="", bg_color="white", fg_color="white", width=51, height=51, hover_color = "white", command=lambda: self.controller.show_frame(Login.MainLogin))
+        img_lab1 = CTkButton(panelUsuario, image=iconBack, text="", bg_color="white", fg_color="white", width=51, height=51, hover_color = "white", command=lambda: goback())
         img_lab1.pack(side = "left", padx = 20, pady = 10)
 
 
+        #Creo que aquí esta el problema al cerrar sesión
+        def goback():
+            Login.sesionActual.sesionActualEmpleado.cerrarSesion()
+            self.controller.show_frame(Login.MainLogin)
+           
+
         #Tarjeta de Usuario
-
-
-        nombreUsuario = CTkButton(panelUsuario, text = "Usuario", font=("Labrada", 30), bg_color="white", fg_color="white", text_color= "black", hover_color="white", command=lambda: self.controller.show_frame(PantallaPerfil.PantallaPerfilEmpleado))
+        nombreUsuario = CTkButton(panelUsuario, text = f"{sesionActual.sesionActualEmpleado.username}", font=("Labrada", 30), bg_color="white", fg_color="white", text_color= "black", hover_color="white", command=lambda: self.controller.show_frame(PantallaPerfil.PantallaPerfilEmpleado))
         imagenUsuario = CTkImage(dark_image= Image.open("IconoUsuarioEjemplo.png"), size = (53,53))
         img_lab2 = CTkLabel(panelUsuario, image=imagenUsuario, text="")   
 
@@ -86,7 +79,7 @@ class MenuPrincipalUsuario(CTkFrame):
 
 
         #Mensaje de Bienvenida
-        bienvenidaTexto = bigText(panelScrollable,"BIENVENIDO, _nombre_usuario")
+        bienvenidaTexto = bigText(panelScrollable, f"BIENVENIDO, {sesionActual.sesionActualEmpleado.username}")
         bienvenidaTexto.pack(anchor = "nw", padx = 50)
 
         #Qué desea hacer?
@@ -94,57 +87,84 @@ class MenuPrincipalUsuario(CTkFrame):
         queDeseaTexto = mediumText(panelScrollable, "¿Qué desea hacer?")
         queDeseaTexto.pack(anchor = "nw", padx = 50)
 
-        #Primer Panel de Opciones
-        panelOpciones1 = CTkFrame(panelScrollable, fg_color="transparent", corner_radius= 16, height = 400)
-        panelOpciones1.pack(expand = True, fill = "x", padx = 50, pady = 20)
-        panelOpciones1.pack_propagate(False)
+        #División de Paneles Según Nivel Acceso
 
-        #División de Paneles
+        if sesionActual.sesionActualEmpleado.nivelAceso == "Vicerrector":
+            #Primer Panel de Opciones
+            panelOpciones1 = CTkFrame(panelScrollable, fg_color="transparent", corner_radius= 16, height = 400)
+            panelOpciones1.pack(expand = True, fill = "x", padx = 50, pady = 20)
+            panelOpciones1.pack_propagate(False)
 
+            #Segundo Panel de Opciones
+            panelOpciones2 = CTkFrame(panelScrollable, fg_color="transparent", corner_radius= 16, height = 400)
+            panelOpciones2.pack(expand = True, fill = "x", padx = 50, pady = 20)
+            panelOpciones2.pack_propagate(False)
+            
+            panelIzquierdo1 = frameOpcion(panelOpciones1, "Abrir Convocatoria", "AbrirConvocatoriaIcon",1, self.controller)
+            panelIzquierdo1.pack(expand = True, side = "left")
+            panelIzquierdo1.pack_propagate(False)
 
-        panelIzquierdo1 = frameOpcion(panelOpciones1, "Abrir Convocatoria", "AbrirConvocatoriaIcon",1, self.controller)
-        panelIzquierdo1.pack(expand = True, side = "left")
-        panelIzquierdo1.pack_propagate(False)
+            panelDerecho1 = frameOpcion(panelOpciones1, "Gestionar Usuarios", "GestionarUsuariosIcon",5, self.controller)
+            panelDerecho1.pack(expand = True, side = "left")
+            panelDerecho1.pack_propagate(False)
 
-        panelDerecho1 = frameOpcion(panelOpciones1, "Evaluar Inscripciones", "EvaluarInscripcionesIcon",2, self.controller)
-        panelDerecho1.pack(expand = True, side = "left")
-        panelDerecho1.pack_propagate(False)
+            panelIzquierdo2 = frameOpcion(panelOpciones2, "Finalizar Convocatoria", "FinalizarConvocatoriaIcon",6, self.controller)
+            panelIzquierdo2.pack(expand = True, side = "left")
+            panelIzquierdo2.pack_propagate(False)
 
-        #Segundo Panel de Opciones
-        panelOpciones2 = CTkFrame(panelScrollable, fg_color="transparent", corner_radius= 16, height = 400)
-        panelOpciones2.pack(expand = True, fill = "x", padx = 50, pady = 20)
-        panelOpciones2.pack_propagate(False)
+        if sesionActual.sesionActualEmpleado.nivelAceso == "Vicerrectoría":
+            #Primer Panel de Opciones
+            panelOpciones1 = CTkFrame(panelScrollable, fg_color="transparent", corner_radius= 16, height = 400)
+            panelOpciones1.pack(expand = True, fill = "x", padx = 50, pady = 20)
+            panelOpciones1.pack_propagate(False)
+            
+            panelIzquierdo1 = frameOpcion(panelOpciones1, "Abrir Convocatoria", "AbrirConvocatoriaIcon",1, self.controller)
+            panelIzquierdo1.pack(expand = True, side = "left")
+            panelIzquierdo1.pack_propagate(False)
 
-        #División de Paneles 2
-
-
-        panelIzquierdo2 = frameOpcion(panelOpciones2, "Resolver Reclamaciones", "ResolverReclamacionesIcon",3, self.controller)
-        panelIzquierdo2.pack(expand = True, side = "left")
-        panelIzquierdo2.pack_propagate(False)
-
-        panelDerecho2 = frameOpcion(panelOpciones2, "Realizar Evaluación", "RealizarEvaluacionIcon",4, self.controller)
-        panelDerecho2.pack(expand = True, side = "left")
-        panelDerecho2.pack_propagate(False)
-
-
-        #Tercer Panel de Opciones
-        panelOpciones3 = CTkFrame(panelScrollable, fg_color="transparent", corner_radius= 16, height = 400)
-        panelOpciones3.pack(expand = True, fill = "x", padx = 50, pady = 20)
-        panelOpciones3.pack_propagate(False)
-
-        #División de Paneles 2
-
-
-        panelIzquierdo3 = frameOpcion(panelOpciones3, "Gestionar Usuarios", "GestionarUsuariosIcon",5, self.controller)
-        panelIzquierdo3.pack(expand = True, side = "left")
-        panelIzquierdo3.pack_propagate(False)
-
-        panelDerecho3 = frameOpcion(panelOpciones3, "Finalizar Convocatoria", "FinalizarConvocatoriaIcon",6, self.controller)
-        panelDerecho3.pack(expand = True, side = "left")
-        panelDerecho3.pack_propagate(False)
+            panelDerecho1 = frameOpcion(panelOpciones1, "Evaluar Inscripciones", "EvaluarInscripcionesIcon",2, self.controller)
+            panelDerecho1.pack(expand = True, side = "left")
+            panelDerecho1.pack_propagate(False)
 
 
+        if sesionActual.sesionActualEmpleado.nivelAceso == "Comité Evaluación":
+            #Primer Panel de Opciones
+            panelOpciones1 = CTkFrame(panelScrollable, fg_color="transparent", corner_radius= 16, height = 400)
+            panelOpciones1.pack(expand = True, fill = "x", padx = 50, pady = 20)
+            panelOpciones1.pack_propagate(False)
 
+            #Segundo Panel de Opciones
+            panelOpciones2 = CTkFrame(panelScrollable, fg_color="transparent", corner_radius= 16, height = 400)
+            panelOpciones2.pack(expand = True, fill = "x", padx = 50, pady = 20)
+            panelOpciones2.pack_propagate(False)
+            
+            panelIzquierdo1 = frameOpcion(panelOpciones1, "Evaluar Inscripciones", "EvaluarInscripcionesIcon",2, self.controller)
+            panelIzquierdo1.pack(expand = True, side = "left")
+            panelIzquierdo1.pack_propagate(False)
+
+            panelDerecho1 = frameOpcion(panelOpciones1, "Resolver Reclamaciones", "ResolverReclamacionesIcon",3, self.controller)
+            panelDerecho1.pack(expand = True, side = "left")
+            panelDerecho1.pack_propagate(False)
+
+            panelIzquierdo2 = frameOpcion(panelOpciones2, "Realizar Evaluación", "RealizarEvaluacionIcon",4, self.controller)
+            panelIzquierdo2.pack(expand = True, side = "left")
+            panelIzquierdo2.pack_propagate(False)
+            
+        if sesionActual.sesionActualEmpleado.nivelAceso == "Equipo de Desarrollo":
+            #Primer Panel de Opciones
+            panelOpciones1 = CTkFrame(panelScrollable, fg_color="transparent", corner_radius= 16, height = 400)
+            panelOpciones1.pack(expand = True, fill = "x", padx = 50, pady = 20)
+            panelOpciones1.pack_propagate(False)
+            
+            panelIzquierdo1 = frameOpcion(panelOpciones1, "Abrir Convocatoria", "AbrirConvocatoriaIcon",1, self.controller)
+            panelIzquierdo1.pack(expand = True, side = "left")
+            panelIzquierdo1.pack_propagate(False)
+
+            panelDerecho1 = frameOpcion(panelOpciones1, "Finalizar Convocatoria", "FinalizarConvocatoriaIcon",6, self.controller)
+            panelDerecho1.pack(expand = True, side = "left")
+            panelDerecho1.pack_propagate(False)
+        
+        
 class frameOpcion(CTkFrame):
 
     def __init__(self, parent, titulo, dir, ventana, controller):
