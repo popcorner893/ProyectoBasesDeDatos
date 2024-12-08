@@ -18,7 +18,7 @@ class MenuPrincipalUsuario(CTkFrame):
         self.columnconfigure((0,1), weight=1)
         self.rowconfigure(0, weight=1)
 
-
+        conexion = conectarMySql.MiConexion()
 
         # Crear canvas para manejar la imagen y el texto
         canvas = tk.Canvas(self, width=640, height=721, highlightthickness=0)
@@ -90,11 +90,10 @@ class MenuPrincipalUsuario(CTkFrame):
         bienvenidaTexto.pack(anchor = "nw", padx = 50)
 
         #Subpanel de Postulaciones
-        panelPostulacionesArray = []
-        for cargo in sesionActual.sesionActualAspirante.cargos:
-            panelPostulaciones = CTkScrollableFrame(panelScrollable, fg_color="#F2F2F2", corner_radius= 16, height = 400)
-            panelPostulaciones.pack(expand = True, fill = "x", padx = 50, pady = 20)
-            panelPostulacionesArray.append(panelPostulaciones)
+        
+        panelPostulaciones = CTkScrollableFrame(panelScrollable, fg_color="#F2F2F2", corner_radius= 16, height = 400)
+        panelPostulaciones.pack(expand = True, fill = "x", padx = 50, pady = 20)
+
         
         #Texto de Postulaciones
 
@@ -103,26 +102,24 @@ class MenuPrincipalUsuario(CTkFrame):
 
 
         #Crea instancias de cada postulación
-        for panelPostulacionesPrueba in panelPostulacionesArray:
+        for cargo in sesionActual.sesionActualAspirante.cargos:
             postulacionPrueba = Postulacion(panelPostulaciones)
             postulacionPrueba.pack(expand = True, fill = "both", padx = 30, pady = 20)
         Postulacion.contador=0 #resetea el contador de paneles para un proximo usuario
 
 
         #Subpanel de Convocatorias Abiertas
-        panelConvocatoriasArray = []
-        for convocatoria in sesionActual.sesionActualAspirante.convocatoria:
-            panelConvocatorias = CTkScrollableFrame(panelScrollable, fg_color="#F2F2F2", corner_radius= 16, height = 400)
-            panelConvocatorias.pack(expand = True, fill = "x", padx = 50, pady = 20)
-            panelConvocatoriasArray.append(panelConvocatorias)
+        
+        panelConvocatorias = CTkScrollableFrame(panelScrollable, fg_color="#F2F2F2", corner_radius= 16, height = 400)
+        panelConvocatorias.pack(expand = True, fill = "x", padx = 50, pady = 20)
 
         #Texto de Convocatorias
 
         textoConvocatorias = CTkLabel(panelConvocatorias, text = "Convocatorias Abiertas:", font=("Labrada", 35))
         textoConvocatorias.pack(anchor = "nw", padx = 20)
 
-        #Crea instancias de convocatorias
-        for convocatoriaPrueba in panelConvocatoriasArray:
+        #Crea instancias de convocatorias 
+        for convocatoria in conexion.get_name_id_all_convocatorias(): 
             convocatoriaPrueba = Convocatoria(panelConvocatorias)
             convocatoriaPrueba.pack(expand = True, fill = "both", padx = 30, pady = 20)
 
@@ -164,9 +161,11 @@ class Postulacion(CTkFrame):
         panelDerecho = CTkFrame(self,fg_color="transparent", corner_radius= 16)
         panelDerecho.grid(row = 0, column = 1, sticky = "nswe")  
         
+        conexion = conectarMySql.MiConexion()
+        #cargo y id del curso que se va a poner en el sub panel #"contador"
         cargo = sesionActual.sesionActualAspirante.cargos[Postulacion.contador]
         idConcurso = sesionActual.sesionActualAspirante.concursos[Postulacion.contador]
-        conexion = conectarMySql.MiConexion()
+        
                    
         # Contenido Panel Izquierdo    
 
@@ -264,9 +263,12 @@ class Convocatoria(CTkFrame):
         panelDerecho.grid(row = 0, column = 1, sticky = "nswe")  
         
         conexion = conectarMySql.MiConexion()
-        #dupla de la fomra (nombreConvocatoria, idConvocatoria)
-        ConvocatoriaActual = conexion.get_name_all_convocatorias()[Convocatoria.contador]
+        
+        #dupla de la forma (nombreConvocatoria, idConvocatoria)
+        ConvocatoriaActual = conexion.get_name_id_all_convocatorias()[Convocatoria.contador]
+        #Lista de cargos ofrecidos en la convocatoria
         cargosConvocatoriaActual = conexion.get_cargos_convocatoria(ConvocatoriaActual[1])
+        
 
         #Contenido Panel Izquierdo    
 
@@ -394,4 +396,3 @@ class concursoPublicacion (CTkFrame):
         imagenDescarga = CTkImage(dark_image= Image.open("DownloadIcon.png"), size = (35,35))
         imagenDescarga1 = CTkLabel(self, image = imagenDescarga, text = "")
         imagenDescarga1.pack(side = "right", padx = 20)
-
