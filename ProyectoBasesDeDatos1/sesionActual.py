@@ -7,7 +7,16 @@ class sesionActualAspirante:
     password = ""
     nombre = ""
     cargos = ""
-    concursos = ""
+import conectarMySql
+
+
+class sesionActualAspirante:
+
+    username = ""
+    password = ""
+    nombre = ""
+    cargos = ""
+    idconcursos = ""
     convocatoria = ""
    
     @classmethod
@@ -17,6 +26,7 @@ class sesionActualAspirante:
         sesionActualAspirante.password = password
         sesionActualAspirante.nombre = conexion.get_full_name_aspirante(username)
         sesionActualAspirante.cargos = conexion.get_cargos_postulado(username)
+        sesionActualAspirante.idconcursos = conexion.get_id_concurso
         sesionActualAspirante.convocatoria = conexion.get_convocatoria_postulado(username)
         
     @classmethod
@@ -25,7 +35,7 @@ class sesionActualAspirante:
         sesionActualAspirante.password = ""
         sesionActualAspirante.nombre = ""
         sesionActualAspirante.cargos = ""
-        sesionActualAspirante.concursos = ""
+        sesionActualAspirante.idconcursos = ""
         sesionActualAspirante.convocatoria = ""  
     
 class sesionActualEmpleado:
@@ -48,6 +58,4 @@ class sesionActualEmpleado:
         sesionActualEmpleado.username = ""
         sesionActualEmpleado.password = ""
         sesionActualEmpleado.nombre = ""
-        sesionActualEmpleado.cargos = ""
-        sesionActualEmpleado.concursos = ""
-        sesionActualEmpleado.convocatoria = ""  
+        sesionActualEmpleado.nivelAceso = ""
