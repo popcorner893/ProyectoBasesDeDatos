@@ -38,7 +38,7 @@ Cuestionarios:
 - Ventana toplevel para ver las matrices de valoración para cada cuestionario
 
 Gestión de Usuario:
-- Tomar cada uno de los valores de las entradas y ejecutar el query de cada gestión
+- ~~Tomar cada uno de los valores de las entradas y ejecutar el query de cada gestión~~
 Convocatorias Activas:
 - Subir la Imagen de la Publicación
 - Poder declarar desierto o publicar los resultados
