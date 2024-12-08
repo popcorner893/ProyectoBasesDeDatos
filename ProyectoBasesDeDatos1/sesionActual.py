@@ -7,7 +7,7 @@ class sesionActualAspirante:
     password = ""
     nombre = ""
     cargos = ""
-    idconcursos = ""
+    concursos = ""
     convocatoria = ""
    
     @classmethod
@@ -17,7 +17,6 @@ class sesionActualAspirante:
         sesionActualAspirante.password = password
         sesionActualAspirante.nombre = conexion.get_full_name_aspirante(username)
         sesionActualAspirante.cargos = conexion.get_cargos_postulado(username)
-        sesionActualAspirante.idconcursos = conexion.get_id_concurso
         sesionActualAspirante.convocatoria = conexion.get_convocatoria_postulado(username)
         
     @classmethod
@@ -26,11 +25,10 @@ class sesionActualAspirante:
         sesionActualAspirante.password = ""
         sesionActualAspirante.nombre = ""
         sesionActualAspirante.cargos = ""
-        sesionActualAspirante.idconcursos = ""
+        sesionActualAspirante.concursos = ""
         sesionActualAspirante.convocatoria = ""  
     
 class sesionActualEmpleado:
-    
     username = ""
     password = ""
     nombre = ""
@@ -45,7 +43,7 @@ class sesionActualEmpleado:
         sesionActualEmpleado.nivelAceso = conexion.get_nivel_Acceso(username)
 
     @classmethod
-    def cerrarSesion():
+    def cerrarSesion(self):
         sesionActualEmpleado.username = ""
         sesionActualEmpleado.password = ""
         sesionActualEmpleado.nombre = ""
