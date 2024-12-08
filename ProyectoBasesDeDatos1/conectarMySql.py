@@ -159,7 +159,7 @@ def get_full_name_empleado(self, username):
     def get_id_concurso(self,username):
         try:
             cur = self.conexion.cursor()
-            sql = """SELECT * FROM usuarioaspirante 
+            sql = """SELECT concurso.idConcurso FROM usuarioaspirante 
                         INNER JOIN aspirante ON aspirante.idAspirante = usuarioaspirante.idUsuarioAspirante
                         INNER JOIN inscripcion ON inscripcion.idAspirante = aspirante.idAspirante
                         INNER JOIN concurso ON concurso.idConcurso = inscripcion.idConcurso
