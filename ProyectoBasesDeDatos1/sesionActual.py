@@ -21,7 +21,7 @@ class sesionActualAspirante:
         sesionActualAspirante.convocatoria = conexion.get_convocatoria_postulado(username)
         
     @classmethod
-    def cerrarSesion():
+    def cerrarSesion(self):
         sesionActualAspirante.username = ""
         sesionActualAspirante.password = ""
         sesionActualAspirante.nombre = ""
