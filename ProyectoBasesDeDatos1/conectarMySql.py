@@ -3,7 +3,7 @@ import pymysql
 class MiConexion:
 	
     def __init__(self):
-        self.conexion = pymysql.connect(host='localhost', user='root', passwd='', db='seleccionprof')
+        self.conexion = pymysql.connect(host='localhost', user='root', passwd='', db='basededatosprof1')
 
     def busca_user_Aspirante(self, users):
         try:
