@@ -7,15 +7,6 @@ class sesionActualAspirante:
     password = ""
     nombre = ""
     cargos = ""
-import conectarMySql
-
-
-class sesionActualAspirante:
-
-    username = ""
-    password = ""
-    nombre = ""
-    cargos = ""
     idconcursos = ""
     convocatoria = ""
    
