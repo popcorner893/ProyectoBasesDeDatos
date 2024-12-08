@@ -1,8 +1,9 @@
 import pymysql
 
 class MiConexion:
+	
     def __init__(self):
-        self.conexion = pymysql.connect(host='localhost', user='root', passwd='', db='basededatosprof1')
+        self.conexion = pymysql.connect(host='localhost', user='root', passwd='', db='seleccionprof')
 
     def busca_user_Aspirante(self, users):
         try:
@@ -43,8 +44,8 @@ class MiConexion:
             return passwordx
         finally:
             cur.close()
-
-    # Obtiene el nombre  de un aspirante completo usando el username  Ejemplo(Alejandro Castro R) 
+            
+    # Obtiene el nombre completo usando el username        
     def get_full_name_aspirante(self, username):
         try:
             cur = self.conexion.cursor()
@@ -58,8 +59,7 @@ class MiConexion:
             return "Sin nombre"
         finally:
                 cur.close()
-
-     # Obtiene el nombre de un empleado completo usando el username  Ejemplo(Alejandro Castro R) 
+    
     def get_full_name_empleado(self, username):
         try:
             cur = self.conexion.cursor()
@@ -72,9 +72,9 @@ class MiConexion:
         except:
             return "Sin nombre"
         finally:
-                cur.close()
-
-    #obtiene una tupla que contiene los cargos aspirado
+                cur.close()            
+                
+                
     def get_cargos_postulado(self, username):
         try:
             cur = self.conexion.cursor()
@@ -90,13 +90,13 @@ class MiConexion:
         except:
             return "Sin Cargos"
         finally:
-                cur.close()  
-
-    #obtiene una tupla que contiene las convocatorias en las que ha estado un aspirante
-    def get_convocatoria_postulado(self, username):
+                cur.close()       
+    
+    #Regresa una tupla con el id de  convocatorias a las que pertenece un aspirante
+    def get_convocatoria_postulado(self, username): 
         try:
             cur = self.conexion.cursor()
-            sql = """SELECT convocatoria.nombreConvocatoria from UsuarioAspirante
+            sql = """SELECT convocatoria.idConvocatoria from UsuarioAspirante
                     INNER JOIN aspirante ON aspirante.idAspirante = usuarioaspirante.idUsuarioAspirante
                     INNER JOIN inscripcion ON inscripcion.idAspirante = aspirante.idAspirante
                     INNER JOIN concurso ON concurso.idConcurso = inscripcion.idConcurso
@@ -108,12 +108,40 @@ class MiConexion:
         except:
             return "No aplica"
         finally:
-                cur.close()
-
-    #obtiene el nivel de acceso de un empleado usando su username
+                cur.close()          
+    
+    #retorna una tupla con los nombres de todas las convocatorias en la base de datps
+    def get_name_all_convocatorias(self):
+        try:
+            cur = self.conexion.cursor()
+            sql = """SELECT convocatoria.nombreConvocatoria, convocatoria.idConvocatoria FROM convocatoria"""
+            cur.execute(sql)
+            return cur.fetchall()
+            miConexion.close()
+        except:
+            return "No aplica"
+        finally:
+                cur.close()   
+    
+    #retorna todos los cargos que se ofrecen en una convocatoria
+    def get_cargos_convocatoria(self, convocatoria):
+        try:
+            cur = self.conexion.cursor()
+            sql = """SELECT cargo.nombreCargo FROM convocatoria 
+                    INNER JOIN concurso ON concurso.idConvocatoria = convocatoria.idConvocatoria
+                    INNER JOIN cargo On cargo.idCargo = concurso.idCargo
+                    WHERE convocatoria.idConvocatoria = %s"""
+            cur.execute(sql, (convocatoria,))
+            return cur.fetchall()[0]
+            miConexion.close()
+        except:
+            return "No se encontraron cargos"
+        finally:
+                cur.close()    
+    
     def get_nivel_Acceso(self,username):
         try:
-            cur = self.miConexion.cursor()
+            cur = self.conexion.cursor()
             sql = """SELECT nivelacceso.nombreNivel FROM usuarioempleado 
                         INNER JOIN empleado ON empleado.idEmpleado = usuarioempleado.idEmpleado
                         INNER JOIN nivelacceso ON nivelacceso.idNivelAcceso = empleado.idNivelAcceso
@@ -124,8 +152,8 @@ class MiConexion:
         except:
             return "No se encontro nivel"
         finally:
-                cur.close() 
-
+                cur.close()    
+    
     #Obtiene una tupla de los Idconcursos de un aspirante atraves de su usuario
     def get_id_concurso(self,username):
         try:
@@ -158,7 +186,7 @@ class MiConexion:
         finally:
                 cur.close() 
     
-    #Obtiene en forma de String el estado de un concurso apartir de su id  
+    #Obtiene en forma de String el estao de un concurso apartir de su id  
     def get_estado_concurso(self, idConcurso):
         try:
             cur = self.conexion.cursor()
@@ -170,7 +198,22 @@ class MiConexion:
         except:
             return "No se encontraro estado"
         finally:
-                cur.close()             
+                cur.close()       
+    
+    #Obtiene una dupla con la fecha de inicio y decha de hoja de vida de un concurso mediante su id
+    def get_fecha_inicio_hojavida_concurso(self, idConcurso):
+        try:
+            cur = self.conexion.cursor()
+            sql = """SELECT cronogramaactividades.fechaInicio, cronogramaactividades.fechaHojasDeVida FROM 
+		            concurso INNER JOIN cronogramaactividades On concurso.idCronograma = cronogramaactividades.idCronograma
+                    where concurso.idConcurso = %s"""
+            cur.execute(sql, (idConcurso,))
+            return cur.fetchall()[0]
+            miConexion.close()
+        except:
+            return "No se encontraron fechas"
+        finally:
+                cur.close()                 
     
     def anade_usuario(self, mode, nombre, ciudad, apellido1, apellido2, usuario, contrasena, nivelAcceso):
         
