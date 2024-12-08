@@ -103,17 +103,18 @@ class MenuPrincipalUsuario(CTkFrame):
 
 
         #Crea instancias de cada postulación
-
         for panelPostulacionesPrueba in panelPostulacionesArray:
- 
             postulacionPrueba = Postulacion(panelPostulaciones)
             postulacionPrueba.pack(expand = True, fill = "both", padx = 30, pady = 20)
+        Postulacion.contador=0 #resetea el contador de paneles para un proximo usuario
 
 
         #Subpanel de Convocatorias Abiertas
-
-        panelConvocatorias = CTkScrollableFrame(panelScrollable, fg_color="#F2F2F2", corner_radius= 16, height = 400)
-        panelConvocatorias.pack(expand = True, fill = "x", padx = 50, pady = 20)
+        panelConvocatoriasArray = []
+        for convocatoria in sesionActual.sesionActualAspirante.convocatoria:
+            panelConvocatorias = CTkScrollableFrame(panelScrollable, fg_color="#F2F2F2", corner_radius= 16, height = 400)
+            panelConvocatorias.pack(expand = True, fill = "x", padx = 50, pady = 20)
+            panelConvocatoriasArray.append(panelConvocatorias)
 
         #Texto de Convocatorias
 
@@ -121,12 +122,9 @@ class MenuPrincipalUsuario(CTkFrame):
         textoConvocatorias.pack(anchor = "nw", padx = 20)
 
         #Crea instancias de convocatorias
-
-        postulacionPrueba = Convocatoria(panelConvocatorias)
-        postulacionPrueba.pack(expand = True, fill = "both", padx = 30, pady = 20)
-
-        postulacionPrueba1 = Convocatoria(panelConvocatorias)
-        postulacionPrueba1.pack(expand = True, fill = "both", padx = 30, pady = 20)
+        for convocatoriaPrueba in panelConvocatoriasArray:
+            convocatoriaPrueba = Convocatoria(panelConvocatorias)
+            convocatoriaPrueba.pack(expand = True, fill = "both", padx = 30, pady = 20)
 
         #Subpanel de Publicaciones Recientes
 
@@ -151,7 +149,7 @@ class MenuPrincipalUsuario(CTkFrame):
 class Postulacion(CTkFrame):
 
     #Clase para crear las postulaciones y no tener que hacerla por separado para cada una
-
+    contador=0 # lleva un registro de la postulacion en la que se encuentra
     def __init__(self, parent):
         
         super().__init__(parent, fg_color="#DEEDFD", corner_radius= 16, bg_color= "transparent") 
@@ -166,89 +164,90 @@ class Postulacion(CTkFrame):
         panelDerecho = CTkFrame(self,fg_color="transparent", corner_radius= 16)
         panelDerecho.grid(row = 0, column = 1, sticky = "nswe")  
         
-        #Bucle para todos los cargos
-        i = 0
-        cargos = sesionActual.sesionActualAspirante.cargos
-        idConcursos = sesionActual.sesionActualAspirante.idconcursos
+        cargo = sesionActual.sesionActualAspirante.cargos[Postulacion.contador]
+        idConcurso = sesionActual.sesionActualAspirante.idconcursos[Postulacion.contador]
         conexion = conectarMySql.MiConexion()
+                   
+        # Contenido Panel Izquierdo    
+
+        nombre_cargo = CTkLabel(panelIzquierdo, text = cargo, font=("Labrada", 25))
+        nombre_cargo.pack(anchor = "nw", padx = 26)
+
+        numero_concurso = CTkLabel(panelIzquierdo, text = "Concurso Número: "+ str(idConcurso), font=("Labrada", 20))
+        numero_concurso.pack(anchor = "nw", padx = 30)
+
+        perfil_cargo = CTkLabel(panelIzquierdo, text = "Perfil del Cargo", font=("Labrada", 25))
+        perfil_cargo.pack(anchor = "nw", padx = 26, pady = 20)
+
+        descripcionCargoFrame = CTkFrame(panelIzquierdo,fg_color="transparent", corner_radius= 16)
+        descripcionCargoFrame.columnconfigure((0,1), weight = 1)
+        descripcionCargoFrame.rowconfigure((0,1), weight= 1)
+        descripcionCargoFrame.pack(anchor = "nw", padx = 26, pady = 20)
+
+        #dupla con area diciplinar y titulo minimo requerido
+        perfiles = conexion.get_perfiles_concurso(idConcurso)
         
-        for cargo in cargos:
-            
-            
-            #Contenido Panel Izquierdo    
+        area_disciplinar = CTkLabel(descripcionCargoFrame, text = "Área Disciplinar:", font=("Labrada", 20))
+        area_disciplinar.grid(row = 0, column = 0)
+        area_disciplinar1 = CTkLabel(descripcionCargoFrame, text = perfiles[0], font=("Labrada", 20))
+        area_disciplinar1.grid(row = 0, column = 1)
 
-            nombre_cargo = CTkLabel(panelIzquierdo, text = cargo, font=("Labrada", 25))
-            nombre_cargo.pack(anchor = "nw", padx = 26)
+        titulacion_minima = CTkLabel(descripcionCargoFrame, text = "Titulación Mínima:", font=("Labrada", 20))
+        titulacion_minima.grid(row = 1, column = 0, padx = 20)
 
-            numero_concurso = CTkLabel(panelIzquierdo, text = "Concurso Número: "+ str(idConcursos[i]), font=("Labrada", 20))
-            numero_concurso.pack(anchor = "nw", padx = 30)
+        titulacion_minima = CTkLabel(descripcionCargoFrame, text = perfiles[1], font=("Labrada", 20))
+        titulacion_minima.grid(row = 1, column = 1, padx = 20)
 
-            perfil_cargo = CTkLabel(panelIzquierdo, text = "Perfil del Cargo", font=("Labrada", 25))
-            perfil_cargo.pack(anchor = "nw", padx = 26, pady = 20)
+        estadoFrame = CTkFrame(panelIzquierdo,fg_color="transparent")
+        estadoFrame.pack(anchor = "nw", pady = 20)
 
-            descripcionCargoFrame = CTkFrame(panelIzquierdo,fg_color="transparent", corner_radius= 16)
-            descripcionCargoFrame.columnconfigure((0,1), weight = 1)
-            descripcionCargoFrame.rowconfigure((0,1), weight= 1)
-            descripcionCargoFrame.pack(anchor = "nw", padx = 26, pady = 20)
+        estado_Persona = CTkLabel(estadoFrame, text = "estado_persona", font=("Labrada", 20))
+        estado_Persona.pack(side = "right", padx = 20)
 
-            area_disciplinar = CTkLabel(descripcionCargoFrame, text = "Área Disciplinar:", font=("Labrada", 20))
-            area_disciplinar.grid(row = 0, column = 0)
-            print(conexion.get_perfiles_concurso(idConcursos[i]))
-            area_disciplinar1 = CTkLabel(descripcionCargoFrame, text = conexion.get_perfiles_concurso(idConcursos[i])[0], font=("Labrada", 20))
-            area_disciplinar1.grid(row = 0, column = 1)
+        estadoConcurso = CTkLabel(estadoFrame, text = "Concurso: "+conexion.get_estado_concurso(idConcurso), font=("Labrada", 20))
+        estadoConcurso.pack(side = "right", padx = 20)
 
-            titulacion_minima = CTkLabel(descripcionCargoFrame, text = "Titulación Mínima:", font=("Labrada", 20))
-            titulacion_minima.grid(row = 1, column = 0, padx = 20)
+        estadoConcurso1 = CTkLabel(estadoFrame, text = "Estado del Concurso", font=("Labrada", 25))
+        estadoConcurso1.pack(side = "right", padx = 26)
 
-            titulacion_minima = CTkLabel(descripcionCargoFrame, text = conexion.get_perfiles_concurso(idConcursos[i])[1], font=("Labrada", 20))
-            titulacion_minima.grid(row = 1, column = 1, padx = 20)
+        #Contenido Panel Derecho
 
-            estadoFrame = CTkFrame(panelIzquierdo,fg_color="transparent")
-            estadoFrame.pack(anchor = "nw", pady = 20)
+        frameCronograma = CTkFrame(panelDerecho,fg_color="#F2F2F2", corner_radius=16, width=300, height=280)
+        frameCronograma.pack(expand = True, padx = 30)
+        frameCronograma.pack_propagate(False)        
 
-            estado_Persona = CTkLabel(estadoFrame, text = "estado_persona", font=("Labrada", 20))
-            estado_Persona.pack(side = "right", padx = 20)
+        subframeCronograma = CTkFrame(frameCronograma,fg_color="transparent")
+        subframeCronograma.pack(fill = "x")
 
-            estadoConcurso = CTkLabel(estadoFrame, text = "Concurso: "+conexion.get_estado_concurso(idConcursos[i]), font=("Labrada", 20))
-            estadoConcurso.pack(side = "right", padx = 20)
+        cronograma = CTkLabel(subframeCronograma, text = "Cronograma", font=("Labrada", 25))
+        cronograma.pack(side = "left", padx = 20)
 
-            estadoConcurso1 = CTkLabel(estadoFrame, text = "Estado del Concurso", font=("Labrada", 25))
-            estadoConcurso1.pack(side = "right", padx = 26)
+        imagenCronograma = CTkImage(dark_image= Image.open("calendarIcon.png"), size = (42,42))
+        cronogramaImagen = CTkLabel(subframeCronograma, image = imagenCronograma, text = "")
+        cronogramaImagen.pack(side = "right", padx = 20)
+        
+        #dupla con fecha de inicio del concuro y fecha para subir hoja de vida
+        fechas = conexion.get_fecha_inicio_hojavida_concurso(idConcurso)
 
-            #Contenido Panel Derecho
+        fechaDeInicio = CTkLabel(frameCronograma, text = "Fecha de Inicio:", font=("Labrada", 20))
+        fechaDeInicio.pack(anchor = "nw", padx = 20, pady = 10)
 
-            frameCronograma = CTkFrame(panelDerecho,fg_color="#F2F2F2", corner_radius=16, width=300, height=280)
-            frameCronograma.pack(expand = True, padx = 30)
-            frameCronograma.pack_propagate(False)        
+        fechaDeInicio1 = CTkLabel(frameCronograma, text = fechas[0] , font=("Labrada", 20))
+        fechaDeInicio1.pack(anchor = "nw", padx = 30, pady = 5)
 
-            subframeCronograma = CTkFrame(frameCronograma,fg_color="transparent")
-            subframeCronograma.pack(fill = "x")
+        fechaHojasDeVida = CTkLabel(frameCronograma, text = "Fecha Hojas de Vida:", font=("Labrada", 20))
+        fechaHojasDeVida.pack(anchor = "nw", padx = 20, pady = 10)
 
-            cronograma = CTkLabel(subframeCronograma, text = "Cronograma", font=("Labrada", 25))
-            cronograma.pack(side = "left", padx = 20)
-
-            imagenCronograma = CTkImage(dark_image= Image.open("calendarIcon.png"), size = (42,42))
-            cronogramaImagen = CTkLabel(subframeCronograma, image = imagenCronograma, text = "")
-            cronogramaImagen.pack(side = "right", padx = 20)
-
-            fechaDeInicio = CTkLabel(frameCronograma, text = "Fecha de Inicio:", font=("Labrada", 20))
-            fechaDeInicio.pack(anchor = "nw", padx = 20, pady = 10)
-
-            fechaDeInicio1 = CTkLabel(frameCronograma, text = "fecha_de_inicio", font=("Labrada", 20))
-            fechaDeInicio1.pack(anchor = "nw", padx = 30, pady = 5)
-
-            fechaHojasDeVida = CTkLabel(frameCronograma, text = "Fecha Hojas de Vida:", font=("Labrada", 20))
-            fechaHojasDeVida.pack(anchor = "nw", padx = 20, pady = 10)
-
-            fechaHojasDeVida1 = CTkLabel(frameCronograma, text = "fecha_hojas_de_vida", font=("Labrada", 20))
-            fechaHojasDeVida1.pack(anchor = "nw", padx = 30, pady = 5)
-            
-            i+=1
+        fechaHojasDeVida1 = CTkLabel(frameCronograma, text = fechas[1], font=("Labrada", 20))
+        fechaHojasDeVida1.pack(anchor = "nw", padx = 30, pady = 5)
+        
+        Postulacion.contador+=1
 
 
 class Convocatoria(CTkFrame):
 
     #Clase para crear las postulaciones y no tener que hacerla por separado para cada una
+    contador=0 #lleva un conteo de la convocatoria en la que se encuentra
 
     def __init__(self, parent):
         
@@ -263,13 +262,18 @@ class Convocatoria(CTkFrame):
 
         panelDerecho = CTkFrame(self,fg_color="transparent", corner_radius= 16)
         panelDerecho.grid(row = 0, column = 1, sticky = "nswe")  
+        
+        conexion = conectarMySql.MiConexion()
+        #dupla de la fomra (nombreConvocatoria, idConvocatoria)
+        ConvocatoriaActual = conexion.get_name_all_convocatorias()[Convocatoria.contador]
+        cargosConvocatoriaActual = conexion.get_cargos_convocatoria(ConvocatoriaActual[1])
 
         #Contenido Panel Izquierdo    
 
-        nombre_convocatoria = CTkLabel(panelIzquierdo, text = "Nombre_Convocatoria", font=("Labrada", 25))
+        nombre_convocatoria = CTkLabel(panelIzquierdo, text = ConvocatoriaActual[0], font=("Labrada", 25))
         nombre_convocatoria.pack(anchor = "nw", padx = 26)
 
-        numero_convocatoria = CTkLabel(panelIzquierdo, text = "Convocatoria Número: id_convocatoria", font=("Labrada", 20))
+        numero_convocatoria = CTkLabel(panelIzquierdo, text = "ID_Convocatoria: "+str(ConvocatoriaActual[1]), font=("Labrada", 20))
         numero_convocatoria.pack(anchor = "nw", padx = 30)
 
         cargosDisponiblesLabel = CTkLabel(panelIzquierdo, text = "Cargos Disponibles", font=("Labrada", 25))
@@ -280,11 +284,11 @@ class Convocatoria(CTkFrame):
 
         #Añadir Instancias de Cargos
 
-        cargoEjemplo1 = cargoDisponible(cargosDisponiblesFrame,"Pescador")
-        cargoEjemplo1.pack(expand = True, fill = "both")
+        for cargo in cargosConvocatoriaActual:
+            cargoEjemplo = cargoDisponible(cargosDisponiblesFrame,cargo)
+            cargoEjemplo.pack(expand = True, fill = "both")
 
-        cargoEjemplo2 = cargoDisponible(cargosDisponiblesFrame,"Arquitecto")
-        cargoEjemplo2.pack(expand = True, fill = "both")
+
 
 
         #Contenido Panel Derecho
@@ -295,6 +299,7 @@ class Convocatoria(CTkFrame):
 
         imagenConvocatoria = CTkLabel(frameImagen, text = "imagen_convocatoria", font=("Labrada", 25))
         imagenConvocatoria.pack(expand = True)
+        Convocatoria.contador+=1
 
 
 
@@ -389,13 +394,4 @@ class concursoPublicacion (CTkFrame):
         imagenDescarga = CTkImage(dark_image= Image.open("DownloadIcon.png"), size = (35,35))
         imagenDescarga1 = CTkLabel(self, image = imagenDescarga, text = "")
         imagenDescarga1.pack(side = "right", padx = 20)
-
-
-
-
-
-
-
-
-
 
