@@ -125,6 +125,52 @@ class MiConexion:
             return "No se encontro nivel"
         finally:
                 cur.close() 
+
+    #Obtiene una tupla de los Idconcursos de un aspirante atraves de su usuario
+    def get_id_concurso(self,username):
+        try:
+            cur = self.conexion.cursor()
+            sql = """SELECT * FROM usuarioaspirante 
+                        INNER JOIN aspirante ON aspirante.idAspirante = usuarioaspirante.idUsuarioAspirante
+                        INNER JOIN inscripcion ON inscripcion.idAspirante = aspirante.idAspirante
+                        INNER JOIN concurso ON concurso.idConcurso = inscripcion.idConcurso
+                        where usuarioaspirante.usuario = %s"""
+            cur.execute(sql, (username,))
+            return cur.fetchall()[0]
+            miConexion.close()
+        except:
+            return "No se encontro ID"
+        finally:
+                cur.close() 
+                
+    #Obtiene una dupla con el area diciplinar y titulacion minima del perfil apartir de un ID concurso
+    def get_perfiles_concurso(self, idConcurso):    
+        try:
+            cur = self.conexion.cursor()
+            sql = """SELECT perfil.areaDisciplinar, perfil.titulacionRequerida FROM 
+		            perfil INNER JOIN concurso ON perfil.idPerfil = concurso.idPerfil
+                    where concurso.idConcurso = %s"""
+            cur.execute(sql, (idConcurso,))
+            return cur.fetchall()[0]
+            miConexion.close()
+        except:
+            return "No se encontraron perfiles"
+        finally:
+                cur.close() 
+    
+    #Obtiene en forma de String el estao de un concurso apartir de su id  
+    def get_estado_concurso(self, idConcurso):
+        try:
+            cur = self.conexion.cursor()
+            sql = """SELECT estado FROM concurso
+                    WHERE idConcurso = %s"""
+            cur.execute(sql, (idConcurso,))
+            return cur.fetchall()[0][0]
+            miConexion.close()
+        except:
+            return "No se encontraro estado"
+        finally:
+                cur.close()             
     
     def anade_usuario(self, mode, nombre, ciudad, apellido1, apellido2, usuario, contrasena, nivelAcceso):
         
