@@ -158,7 +158,7 @@ class MiConexion:
         finally:
                 cur.close() 
     
-    #Obtiene en forma de String el estao de un concurso apartir de su id  
+    #Obtiene en forma de String el estado de un concurso apartir de su id  
     def get_estado_concurso(self, idConcurso):
         try:
             cur = self.conexion.cursor()
