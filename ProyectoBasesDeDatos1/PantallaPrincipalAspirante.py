@@ -165,7 +165,7 @@ class Postulacion(CTkFrame):
         panelDerecho.grid(row = 0, column = 1, sticky = "nswe")  
         
         cargo = sesionActual.sesionActualAspirante.cargos[Postulacion.contador]
-        idConcurso = sesionActual.sesionActualAspirante.idconcursos[Postulacion.contador]
+        idConcurso = sesionActual.sesionActualAspirante.concursos[Postulacion.contador]
         conexion = conectarMySql.MiConexion()
                    
         # Contenido Panel Izquierdo    
