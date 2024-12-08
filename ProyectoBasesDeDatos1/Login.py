@@ -13,7 +13,9 @@ class MainLogin(CTkFrame):
     def __init__(self, parent, controller):
 
 
-        super().__init__(parent, fg_color="white") 
+        super().__init__(parent, fg_color="white")
+        sesionActual.sesionActualAspirante.cerrarSesion()
+        sesionActual.sesionActualEmpleado.cerrarSesion()
 
         def siguienteLogIn(index):
             if index == 0:
