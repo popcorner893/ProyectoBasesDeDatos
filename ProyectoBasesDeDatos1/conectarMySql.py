@@ -59,8 +59,9 @@ class MiConexion:
             return "Sin nombre"
         finally:
                 cur.close()
-    
-    def get_full_name_empleado(self, username):
+
+	# Obtiene el nombre completo usando el username       
+def get_full_name_empleado(self, username):
         try:
             cur = self.conexion.cursor()
             sql = """SELECT CONCAT_WS(' ', empleado.nombre, empleado.apellido1, SUBSTR(empleado.apellido2, 1, 1)) 
@@ -74,7 +75,7 @@ class MiConexion:
         finally:
                 cur.close()            
                 
-                
+    #Obtiene los cargos a los que esta aspirando un usuario            
     def get_cargos_postulado(self, username):
         try:
             cur = self.conexion.cursor()
