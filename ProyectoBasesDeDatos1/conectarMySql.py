@@ -126,6 +126,303 @@ class MiConexion:
         finally:
                 cur.close() 
     
+    def anade_usuario(self, mode, nombre, ciudad, apellido1, apellido2, usuario, contrasena, nivelAcceso):
+        
+        if mode == 0:
+
+            cur = self.conexion.cursor()
+
+            try:
+                # Inserción en la tabla Aspirante
+                query_aspirante = """
+                    INSERT INTO Aspirante (nombre, ciudad, apellido1, apellido2, idHojadeVida)
+                    VALUES (%s, %s, %s, %s, NULL)
+                """
+                cur.execute(query_aspirante, (nombre, ciudad, apellido1, apellido2))
+                
+                # Recuperar el ID del aspirante recién insertado
+                id_aspirante = cur.lastrowid
+                
+                # Inserción en la tabla UsuarioAspirante
+                query_usuario = """
+                    INSERT INTO UsuarioAspirante (usuario, password, idAspirante)
+                    VALUES (%s, %s, %s)
+                """
+                cur.execute(query_usuario, (usuario, contrasena, id_aspirante))
+                
+                # Confirmar los cambios
+                self.conexion.commit()
+                messagebox.showinfo("Éxito", "Usuario Creado Correctamente")
+            
+            except Exception as e:
+                # Revertir los cambios si algo falla
+                self.conexion.rollback()
+                print(f"Error al agregar el usuario y el aspirante: {e}")
+    
+
+            cur.close()
+
+
+        elif mode == 1:
+
+            cur = self.conexion.cursor()
+
+            if int(nivelAcceso) > 2: nivelAcceso = 2
+
+            try:
+                # Inserción en la tabla Aspirante
+                query_empleado = """
+                    INSERT INTO empleado (nombre, ciudad, apellido1, apellido2, idNivelAcceso)
+                    VALUES (%s, %s, %s, %s, %s)
+
+                """
+
+                
+
+                cur.execute(query_empleado, (nombre, ciudad, apellido1, apellido2, nivelAcceso))
+                
+                # Recuperar el ID del aspirante recién insertado
+                id_empleado = cur.lastrowid
+                
+                # Inserción en la tabla UsuarioAspirante
+                query_usuario = """
+                    INSERT INTO UsuarioEmpleado (usuario, password, idEmpleado)
+                    VALUES (%s, %s, %s)
+                """
+                cur.execute(query_usuario, (usuario, contrasena, id_empleado))
+                
+                # Confirmar los cambios
+                self.conexion.commit()
+                messagebox.showinfo("Éxito", "Usuario Creado Correctamente")
+            
+            except Exception as e:
+                # Revertir los cambios si algo falla
+                self.conexion.rollback()
+                messagebox.showerror("Error", "Error al Agregar el Usuario")
+    
+
+            cur.close()
+
+
+    def modificar_usuario(self, mode, nombre, ciudad, apellido1, apellido2, usuario, contrasena, nivelAcceso, id):
+
+        if mode == 0:
+
+            cur = self.conexion.cursor()
+            try:
+                # Actualización en la tabla Aspirante
+                query_aspirante = """
+                    UPDATE Aspirante
+                    SET 
+                        nombre = COALESCE(%s, nombre),
+                        ciudad = COALESCE(%s, ciudad),
+                        apellido1 = COALESCE(%s, apellido1),
+                        apellido2 = COALESCE(%s, apellido2)
+                    WHERE idAspirante = %s
+                """
+                cur.execute(query_aspirante, (nombre, ciudad, apellido1, apellido2, id))
+
+                # Actualización en la tabla UsuarioAspirante
+                query_usuario = """
+                    UPDATE UsuarioAspirante
+                    SET 
+                        usuario = COALESCE(%s, usuario),
+                        password = COALESCE(%s, password)
+                    WHERE idAspirante = %s
+                """
+                cur.execute(query_usuario, (usuario, contrasena, id))
+
+                # Confirmar los cambios
+                self.conexion.commit()
+                messagebox.showinfo("Éxito", "Usuario Modificado Correctamente")
+
+            except Exception as e:
+                # Revertir los cambios si algo falla
+                self.conexion.rollback()
+                print(f"Error al modificar el usuario y el aspirante: {e}")
+                messagebox.showerror("Error", f"No se pudo modificar el usuario: {e}")
+    
+
+            cur.close()
+
+
+        elif mode == 1:
+
+            cur = self.conexion.cursor()
+
+            if int(nivelAcceso) > 2: nivelAcceso = 2
+            try:
+                # Actualización en la tabla Aspirante
+                query_empleado = """
+                    UPDATE Empleado
+                    SET 
+                        nombre = COALESCE(%s, nombre),
+                        ciudad = COALESCE(%s, ciudad),
+                        apellido1 = COALESCE(%s, apellido1),
+                        apellido2 = COALESCE(%s, apellido2),
+                        idNivelAcceso = COALESCE(%s, idNivelAcceso)
+                    WHERE idEmpleado = %s
+                """
+                cur.execute(query_empleado, (nombre, ciudad, apellido1, apellido2,nivelAcceso, id))
+
+                # Actualización en la tabla UsuarioAspirante
+                query_usuario = """
+                    UPDATE UsuarioEmpleado
+                    SET 
+                        usuario = COALESCE(%s, usuario),
+                        password = COALESCE(%s, password)
+                    WHERE idEmpleado = %s
+                """
+                cur.execute(query_usuario, (usuario, contrasena, id))
+
+                # Confirmar los cambios
+                self.conexion.commit()
+                messagebox.showinfo("Éxito", "Usuario Modificado Correctamente")
+
+            except Exception as e:
+                # Revertir los cambios si algo falla
+                self.conexion.rollback()
+                print(f"Error al modificar el usuario y el aspirante: {e}")
+                messagebox.showerror("Error", f"No se pudo modificar el usuario: {e}")
+    
+
+            cur.close()
+
+
+    def existe_aspirante(self, id):
+        try:
+            cur = self.conexion.cursor()
+            sql = "SELECT 1 FROM Aspirante WHERE idAspirante = %s LIMIT 1"
+            cur.execute(sql, (id,))
+            resultado = cur.fetchone()
+            return resultado is not None  # Devuelve True si existe, False si no
+        finally:
+            cur.close()
+
+
+    def buscar_info_aspirante(self, id):
+        try:
+            cur = self.conexion.cursor()
+            sql = """
+                SELECT 
+                    UsuarioAspirante.usuario,
+                    UsuarioAspirante.password,
+                    Aspirante.nombre,
+                    Aspirante.apellido1,
+                    Aspirante.apellido2,
+                    Aspirante.ciudad
+                FROM 
+                    Aspirante
+                JOIN 
+                    UsuarioAspirante 
+                ON 
+                    UsuarioAspirante.idAspirante = Aspirante.idAspirante
+                WHERE 
+                    Aspirante.idAspirante = %s
+            """
+            cur.execute(sql, (id,))
+            resultado = cur.fetchone()
+            return resultado  # Devuelve una tupla con los datos o None si no existe
+        finally:
+            cur.close()
+
+    
+    def existe_empleado(self, id):
+        try:
+            cur = self.conexion.cursor()
+            sql = "SELECT 1 FROM empleado WHERE idEmpleado = %s LIMIT 1"
+            cur.execute(sql, (id,))
+            resultado = cur.fetchone()
+            return resultado is not None  # Devuelve True si existe, False si no
+        finally:
+            cur.close()
+
+
+    def buscar_info_empleado(self, id):
+        try:
+            cur = self.conexion.cursor()
+            sql = """
+                SELECT 
+                    UsuarioEmpleado.usuario,
+                    UsuarioEmpleado.password,
+                    Empleado.nombre,
+                    Empleado.apellido1,
+                    Empleado.apellido2,
+                    Empleado.ciudad,
+                    Empleado.idNivelAcceso
+                FROM 
+                    Empleado
+                JOIN 
+                    UsuarioEmpleado 
+                ON 
+                    UsuarioEmpleado.idEmpleado = Empleado.idEmpleado
+                WHERE 
+                    Empleado.idEmpleado = %s
+            """
+            cur.execute(sql, (id,))
+            resultado = cur.fetchone()
+            return resultado  # Devuelve una tupla con los datos o None si no existe
+        finally:
+            cur.close()
+
+
+    def eliminarUsuarioAspirante(self, mode, id):
+
+        if mode == 0:
+
+            try:
+                cur = self.conexion.cursor()
+
+                # Eliminar primero de la tabla UsuarioAspirante
+                sql_eliminar_usuario = "DELETE FROM UsuarioAspirante WHERE idAspirante = %s"
+                cur.execute(sql_eliminar_usuario, (id,))
+
+                # Luego, eliminar de la tabla Aspirante
+                sql_eliminar_aspirante = "DELETE FROM Aspirante WHERE idAspirante = %s"
+                cur.execute(sql_eliminar_aspirante, (id,))
+
+                # Confirmar los cambios
+                self.conexion.commit()
+                messagebox.showinfo("Éxito", "Usuario aspirante eliminado correctamente.")
+
+            except Exception as e:
+                # Revertir cambios en caso de error
+                self.conexion.rollback()
+                print(f"Error al eliminar el usuario aspirante: {e}")
+                messagebox.showerror("Error", f"No se pudo eliminar el usuario aspirante: {e}")
+
+        elif mode == 1:
+
+            try:
+                cur = self.conexion.cursor()
+
+                # Eliminar primero de la tabla UsuarioAspirante
+                sql_eliminar_usuario = "DELETE FROM UsuarioEmpleado WHERE idEmpleado = %s"
+                cur.execute(sql_eliminar_usuario, (id,))
+
+                # Luego, eliminar de la tabla Aspirante
+                sql_eliminar_empleado = "DELETE FROM Empleado WHERE idEmpleado = %s"
+                cur.execute(sql_eliminar_empleado, (id,))
+
+                # Confirmar los cambios
+                self.conexion.commit()
+                messagebox.showinfo("Éxito", "Usuario empleado eliminado correctamente.")
+
+            except Exception as e:
+                # Revertir cambios en caso de error
+                self.conexion.rollback()
+                print(f"Error al eliminar el usuario empleado: {e}")
+                messagebox.showerror("Error", f"No se pudo eliminar el usuario empleado: {e}")
+
+
+        
+        cur.close()
+
+
+
+
+
+
 
 
 
