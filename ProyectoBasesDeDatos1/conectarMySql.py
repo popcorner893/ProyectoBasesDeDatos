@@ -770,6 +770,208 @@ class MiConexion:
         cur.close()
 
 
+	#Mis cambios:
+
+    def insertar_datos_acuerdo(self, archivoAcuerdo):
+        try:
+            cur = self.conexion.cursor()   
+            cur.execute('''
+            INSERT INTO Acuerdo (archivoAcuerdo)
+            VALUES (%s)
+            ''', (archivoAcuerdo,))
+            self.conexion.commit()
+            idAcuerdo = cur.lastrowid
+            return idAcuerdo
+        except Exception as e:
+            self.conexion.rollback()
+            messagebox.showerror("Error", "Error al insertar acuerdo")
+
+    def insertar_datos_calendario(self,fechainicio, fechafin):
+        try:
+            cur = self.conexion.cursor()   
+            cur.execute('''
+            INSERT INTO CalendarioConvocatoria (fechaInicio, fechaFin)
+            VALUES (%s, %s)
+            ''', (fechainicio, fechafin))
+            self.conexion.commit()
+            idCalendario = cur.lastrowid  # Obtener el id del último acuerdo insertado
+            cur.close()
+            return idCalendario
+        except Exception as e:
+            self.conexion.rollback()
+            messagebox.showerror("Error", "Error al insertar calendario")
+    
+
+            cur.close()
+
+    def insertar_datos_convocatoria(self, nombreConvocatoria, idCalendario, idAcuerdo,imagenConvocatoria):
+        try:
+            cur = self.conexion.cursor()   
+            cur.execute('''INSERT INTO Convocatoria (nombreConvocatoria, idCalendario, idAcuerdo, imagenConvocatoria)
+            VALUES (%s, %s, %s, %s)
+            ''', (nombreConvocatoria, idCalendario, idAcuerdo, imagenConvocatoria))
+            self.conexion.commit()
+            idConvocatoria = cur.lastrowid  # Obtener el id del último acuerdo insertado
+            cur.close()
+            return idConvocatoria
+        except Exception as e:
+            self.conexion.rollback()
+            messagebox.showerror("Error", "Error al insertar convocatoria")
+    
+
+            cur.close()
+
+    def insertar_datos_concurso(self, idCargo, idPerfil, idCronograma, idConvocatoria, idComite, estado):
+        try:
+            cur = self.conexion.cursor()
+            cur.execute('''
+            INSERT INTO Concurso (idPerfil, idCargo, idCronograma, idConvocatoria, idComite, estado)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            ''', (idCargo, idPerfil, idCronograma, idConvocatoria, idComite, estado))
+            self.conexion.commit()
+            idConcurso = cur.lastrowid
+            cur.close()
+            return idConcurso
+        except Exception as e:
+            self.conexion.rollback()
+            messagebox.showerror("Error", "Error al insertar concurso")
+        
+    def obtener_o_insertar_cargo(self, nombreCargo, idEscuela):
+        try:
+        # Verificar si el cargo existe
+            cur = self.conexion.cursor()
+            sql_select = "SELECT idCargo FROM Cargo WHERE nombreCargo = %s"
+            cur.execute(sql_select, (nombreCargo,))
+            resultado = cur.fetchone()
+        
+            if resultado:
+            # Si existe, devolver el ID
+                return resultado[0]
+            else:
+            # Si no existe, insertar y devolver el nuevo ID
+                sql_insert = '''
+                INSERT INTO Cargo (nombreCargo, idEscuela)
+                VALUES (%s, %s)
+                '''
+                cur.execute(sql_insert, (nombreCargo, idEscuela))
+                self.conexion.commit()
+                return cur.lastrowid
+        except Exception as e:
+        # Manejo de errores e impresión del mensaje
+            self.conexion.rollback()
+            messagebox.showerror("Error", f"Error al procesar el cargo: {e}")
+        finally:
+            cur.close()
+
+    def obtener_o_insertar_escuela(self, nombreEscuela):
+        try:
+        # Verificar si el cargo existe
+            cur = self.conexion.cursor()
+            sql_select = "SELECT idEscuela FROM Escuela WHERE nombreEscuela = %s"
+            cur.execute(sql_select, (nombreEscuela,))
+            resultado = cur.fetchone()
+        
+            if resultado:
+            # Si existe, devolver el ID
+                return resultado[0]
+            else:
+            # Si no existe, insertar y devolver el nuevo ID
+                sql_insert = '''
+                INSERT INTO Escuela (nombreEscuela)
+                VALUES (%s)
+                '''
+                cur.execute(sql_insert, (nombreEscuela))
+                self.conexion.commit()
+                return cur.lastrowid
+        except Exception as e:
+        # Manejo de errores e impresión del mensaje
+            self.conexion.rollback()
+            messagebox.showerror("Error", f"Error al procesar el cargo: {e}")
+        finally:
+            cur.close()
+
+    def obtener_o_insertar_perfil(self, areaD, titu, exp, areaA, compromiso, modalidad):
+        try:
+        # Conexión a la base de datos
+            cur = self.conexion.cursor()
+
+        # Verificar si el perfil ya existe
+            sql_select = """
+            SELECT idPerfil 
+            FROM Perfil 
+            WHERE areaD = %s AND titu = %s AND exp = %s AND areaA = %s AND compromiso = %s AND modalidad = %s
+            """
+            cur.execute(sql_select, (areaD, titu, exp, areaA, compromiso, modalidad))
+            resultado = cur.fetchone()
+
+            if resultado:
+            # Si existe, devolver el ID del perfil
+                return resultado[0]
+            else:
+            # Si no existe, insertar el nuevo perfil
+                sql_insert = '''
+                INSERT INTO Perfil (areaD, titu, exp, areaA, compromiso, modalidad)
+                VALUES (%s, %s, %s, %s, %s, %s)
+                '''
+                cur.execute(sql_insert, (areaD, titu, exp, areaA, compromiso, modalidad))
+                self.conexion.commit()
+                return cur.lastrowid
+        except Exception as e:
+        # Manejo de errores
+            self.conexion.rollback()
+            messagebox.showerror("Error", f"Error al procesar el perfil: {e}")
+        finally:
+            cur.close()
+
+
+    def obtener_Modalidad(self, nombreModalidad):
+        try:
+        # Verificar si el cargo existe
+            cur = self.conexion.cursor()
+            sql_select = "SELECT idModalidad FROM modalidad WHERE nombreModalidad = %s"
+            cur.execute(sql_select, (nombreModalidad,))
+            resultado = cur.fetchone()
+            return resultado[0]
+        except Exception as e:
+        # Manejo de errores e impresión del mensaje
+            self.conexion.rollback()
+            messagebox.showerror("Error", f"Error al procesar el cargo: {e}")
+        finally:
+            cur.close()
+
+    def obtener_o_insertar_cronograma(self, fechainicio, fechaHojasDeVida, fechaPsicotecnica, fechaSesionDocente, fechaEntrevista, fechaFin):
+        try:
+        # Conexión a la base de datos
+            cur = self.conexion.cursor()
+
+        # Verificar si el perfil ya existe
+            sql_select = """
+            SELECT idCronograma 
+            FROM cronogramaactividades 
+            WHERE fechainicio = %s AND fechaHojasDeVida = %s AND fechaPsicotecnica = %s AND fechaSesionDocente = %s AND fechaEntrevista = %s AND fechaFin = %s
+            """
+            cur.execute(sql_select, (fechainicio, fechaHojasDeVida, fechaPsicotecnica, fechaSesionDocente, fechaEntrevista, fechaFin))
+            resultado = cur.fetchone()
+
+            if resultado:
+            # Si existe, devolver el ID del perfil
+                return resultado[0]
+            else:
+            # Si no existe, insertar el nuevo perfil
+                sql_insert = '''
+                INSERT INTO Perfil (areaD, titu, exp, areaA, compromiso, modalidad)
+                VALUES (%s, %s, %s, %s, %s, %s)
+                '''
+                cur.execute(sql_insert, (fechainicio, fechaHojasDeVida, fechaPsicotecnica, fechaSesionDocente, fechaEntrevista, fechaFin))
+                self.conexion.commit()
+                return cur.lastrowid
+        except Exception as e:
+        # Manejo de errores
+            self.conexion.rollback()
+            messagebox.showerror("Error", f"Error al procesar el perfil: {e}")
+        finally:
+            cur.close()
+
 
 
 
