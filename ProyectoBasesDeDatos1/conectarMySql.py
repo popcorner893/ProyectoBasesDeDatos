@@ -73,7 +73,65 @@ class MiConexion:
         except:
             return "Sin nombre"
         finally:
-                cur.close()            
+                cur.close()          
+        
+                
+    # Regreesa una tripla con el nombre y apellidos de un usuario
+    def get_list_full_name_aspirante(self, username):
+        try:
+            cur = self.conexion.cursor()
+            sql = """SELECT aspirante.nombre, aspirante.apellido1, aspirante.apellido2
+                    FROM aspirante INNER JOIN usuarioaspirante ON aspirante.idAspirante = usuarioaspirante.idUsuarioAspirante 
+                    WHERE usuarioaspirante.usuario = %s"""
+            cur.execute(sql, (username,))
+            return cur.fetchall()[0]
+            miConexion.close()
+        except:
+            return ("Sin nombre","sin apellido","sin apellido")
+        finally:
+                cur.close()
+                
+    def get_list_full_name_empleado(self, username):
+        try:
+            cur = self.conexion.cursor()
+            sql = """SELECT empleado.nombre, empleado.apellido1, empleado.apellido2
+                    FROM empleado INNER JOIN usuarioempleado ON empleado.idEmpleado = usuarioempleado.idUsuarioEmpleado 
+                    WHERE usuarioempleado.usuario = %s"""
+            cur.execute(sql, (username,))
+            return cur.fetchall()[0]
+            miConexion.close()
+        except:
+            return ("Sin nombre","sin apellido","sin apellido")
+        finally:
+                cur.close()
+                
+    def get_ciudad_aspirante(self, username):
+        try:
+            cur = self.conexion.cursor()
+            sql = """SELECT aspirante.ciudad FROM usuarioaspirante
+                    INNER JOIN aspirante ON aspirante.idEmpleado = usuarioaspirante.idAspirante
+                    where usuarioaspirante.usuario = %s"""
+            cur.execute(sql, (username,))
+            return cur.fetchall()[0][0]
+            miConexion.close()
+        except:
+            return "No figura"
+        finally:
+                cur.close()
+                
+    def get_ciudad_empleado(self, username):
+        try:
+            cur = self.conexion.cursor()
+            sql = """SELECT empleado.ciudad FROM usuarioempleado 
+			        INNER JOIN empleado ON empleado.idEmpleado = usuarioempleado.idEmpleado 
+                    where usuarioempleado.usuario = %s"""
+            cur.execute(sql, (username,))
+            return cur.fetchall()[0][0]
+            miConexion.close()
+        except:
+            return "No figura"
+        finally:
+                cur.close()
                 
     #Regresa una lista con los cargos a los que esta aspirando un usuario            
     def get_cargos_postulado(self, username):
