@@ -2,7 +2,8 @@ import customtkinter as ctk
 import tkinter as tk
 from PIL import Image
 from Utilidades import *
-import PantallaPrincipalEmpleado, PantallaPerfil, Cargo, AnadirMiembro
+import PantallaPrincipalEmpleado, PantallaPerfil, AnadirMiembro, Login, conectarMySql, Cargo
+
 
 
 class AbrirConvocatoria(CTkFrame):
@@ -14,10 +15,10 @@ class AbrirConvocatoria(CTkFrame):
 
         self.controller = controller
 
+        self.mi_conexion = conectarMySql.MiConexion()
+
         self.columnconfigure((0,1), weight=1)
         self.rowconfigure(0, weight=1)
-
-
 
         # Crear canvas para manejar la imagen y el texto
         canvas = tk.Canvas(self, width=640, height=721, highlightthickness=0)
@@ -25,7 +26,10 @@ class AbrirConvocatoria(CTkFrame):
 
         #Imagen de Fondo
         self.img_fondo = tk.PhotoImage(file="FondoDegradadoMain.png")  # Mantener referencia a la imagen
-        canvas.create_image(0, 0, image=self.img_fondo, anchor="nw")  # Colocar la imagen en la esquina superior izquierda     
+        canvas.create_image(0, 0, image=self.img_fondo, anchor="nw")  # Colocar la imagen en la esquina superior izquierda
+
+        # Variable para almacenar la ruta del archivo
+        self.ruta_archivo = None    
 
 
         frameBlancoFondo = CTkFrame(
@@ -72,7 +76,7 @@ class AbrirConvocatoria(CTkFrame):
         #Tarjeta de Usuario
 
 
-        nombreUsuario = CTkButton(panelUsuario, text = "Usuario", font=("Labrada", 30), bg_color="white", fg_color="white", text_color= "black", hover_color="white", command = lambda: self.controller.show_frame(PantallaPerfil.PantallaPerfilEmpleado))
+        nombreUsuario = CTkButton(panelUsuario, text = f"{Login.sesionActual.sesionActualEmpleado.username}", font=("Labrada", 30), bg_color="white", fg_color="white", text_color= "black", hover_color="white", command = lambda: self.controller.show_frame(PantallaPerfil.PantallaPerfilEmpleado))
         imagenUsuario = CTkImage(dark_image= Image.open("IconoUsuarioEjemplo.png"), size = (53,53))
         img_lab2 = CTkLabel(panelUsuario, image=imagenUsuario, text="")   
 
@@ -161,7 +165,7 @@ class AbrirConvocatoria(CTkFrame):
         iconoSubir = icono(panelSubirHoja, "UploadIcon1", 30, 30)
         iconoSubir.pack(side = "left")
 
-        botonSubir = botonAccion(panelSubirHoja, "Subir Nuevo Archivo", 20, "verde", 320, 34, lambda: None)
+        botonSubir = botonAccion(panelSubirHoja, "Subir Nuevo Archivo", 20, "verde", 320, 34, lambda: self.seleccionar_archivo())
         botonSubir.pack(side = "left", padx = 20)
 
 
@@ -173,7 +177,7 @@ class AbrirConvocatoria(CTkFrame):
         framePublicacion = CTkFrame(panelScrollable, fg_color= "transparent", bg_color= "transparent", corner_radius= 16)
         framePublicacion.pack(anchor = "nw", padx = 20, fill = "x", pady = 30)
 
-        archivoPublicacion = smallText(framePublicacion, "Archivo de Acuerdo:")
+        archivoPublicacion = smallText(framePublicacion, "Archivo de Publicación:")
         archivoPublicacion.pack(side = "left")
 
         panelSubirHoja1 = CTkFrame(framePublicacion, fg_color = "transparent")
@@ -182,13 +186,30 @@ class AbrirConvocatoria(CTkFrame):
         iconoSubir1 = icono(panelSubirHoja1, "UploadIcon1", 30, 30)
         iconoSubir1.pack(side = "left")
 
-        botonSubir1 = botonAccion(panelSubirHoja1, "Subir Nuevo Archivo", 20, "verde", 320, 34, lambda: None)
+        botonSubir1 = botonAccion(panelSubirHoja1, "Subir Nuevo Archivo", 20, "verde", 320, 34, lambda: self.sls())
         botonSubir1.pack(side = "left", padx = 20)
 
         #Botón Final
 
         botonSubirConvocatoria = botonAccion(panelScrollable, "Subir Convocatoria", 33, "verde", 470, 60, lambda: None)
         botonSubirConvocatoria.pack(anchor = "nw", padx = 20)
+
+    def seleccionar_archivo(self):
+
+        # Abre el explorador de archivos y guarda la ruta seleccionada
+        archivo = filedialog.askopenfilename(title="Selecciona un archivo")
+        if archivo:  # Si se seleccionó un archivo
+            self.ruta_archivo = archivo
+            self.idAcuerdo = self.mi_conexion.insertar_datos_acuerdo(self.ruta_archivo)
+
+    def sls(self):
+
+        """
+        (Prueba, necesito que traiga las listas de pantalla Cargo)
+        
+        #print(self.idAcuerdo)
+        lista_idCalendario = Cargo.AnadirCargo.get_lista_id_calendario(self)
+        print("Lista idCalendario", lista_idCalendario)"""""
 
 
 
