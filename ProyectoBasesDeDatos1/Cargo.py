@@ -21,11 +21,10 @@ class AnadirCargo(CTkFrame):
         self.columnconfigure((0,1), weight=1)
         self.rowconfigure(0, weight=1)
 
-        self.lista_idEscuela = []
-        self.lista_idCargo = []
-        self.lista_idPerfil = []
-
-        self.lista_idCalendario = []
+        lista_idEscuela = []
+        lista_idCargo = []
+        lista_idPerfil = []
+        lista_idCalendario = []
 
 
 
@@ -202,7 +201,8 @@ class AnadirCargo(CTkFrame):
             fechaPsiQuery = entradaFecha4.fecha_seleccionada
             fechaSDQuery = entradaFecha5.fecha_seleccionada
             fechaEntQuery = entradaFecha6.fecha_seleccionada 
-            if not cargoQuery.strip() or not escuelaQuery.strip() or not DisciplinaQuery.strip() or not titulacionQuery.strip() or not expQuery.strip() or not areaQuery.strip() or not modalidadQuery.strip() or not compromisoQuery.strip() or not fechaIniCQuery or not fechaFinCQuery or not fechaHDVQuery or not fechaPsiQuery or not fechaSDQuery or not fechaEntQuery:
+
+            if not cargoQuery.strip() or not escuelaQuery.strip() or not DisciplinaQuery.strip() or not titulacionQuery.strip() or not expQuery.strip() or not areaQuery.strip() or not modalidadQuery.strip() or not fechaIniCQuery or not fechaFinCQuery or not fechaHDVQuery or not fechaPsiQuery or not fechaSDQuery or not fechaEntQuery:
                 messagebox.showerror("Error", "Alguno de los campos se encuentra vacío")
             else:
             
@@ -210,13 +210,13 @@ class AnadirCargo(CTkFrame):
                 idModalidad = self.mi_conexion.obtener_Modalidad(modalidadQuery)
                 idEscuela = self.mi_conexion.obtener_o_insertar_escuela(escuelaQuery)
                 idCargo = self.mi_conexion.obtener_o_insertar_cargo(cargoQuery, idEscuela)
-                idPerfil = self.mi_conexion.obtener_o_insertar_perfil(DisciplinaQuery,titulacionQuery,expQuery,areaQuery,compromisoQuery,idModalidad)
-                idCalendario = self.mi_conexion.obtener_o_insertar_perfil(fechaIniCQuery,fechaHDVQuery,fechaPsiQuery,fechaSDQuery,fechaEntQuery,fechaFinCQuery)
+                idPerfil = self.mi_conexion.obtener_o_insertar_perfil(DisciplinaQuery,titulacionQuery,expQuery,areaQuery, compromisoQuery, idModalidad)
+                idCalendario = self.mi_conexion.obtener_o_insertar_cronograma(fechaIniCQuery,fechaHDVQuery, fechaPsiQuery, fechaSDQuery, fechaEntQuery, fechaFinCQuery)
                 
-                self.lista_idEscuela.append(idEscuela)
-                self.lista_idCargo.append(idCargo)
-                self.lista_idPerfil.append(idPerfil)
-                self.lista_idCalendario.append(idCalendario)
+                lista_idEscuela.append(idEscuela)
+                lista_idCargo.append(idCargo)
+                lista_idPerfil.append(idPerfil)
+                lista_idCalendario.append(idCalendario)
 
                 nombreCargo.entradaTexto.delete(0, 'end')
                 escuela.entradaTexto.delete(0, 'end')
@@ -226,14 +226,11 @@ class AnadirCargo(CTkFrame):
                 areaAcademica.entradaTexto.delete(0, 'end')
                 modalidad.entradaTexto.delete(0, 'end')
                 compromiso.entradaTexto.delete(0, 'end')
-            """  
-            (No se si funciona)
-                 entradaFecha1.limpiar_fecha()
-            #    entradaFecha2.limpiar_fecha()
-            #    entradaFecha3.limpiar_fecha()
-            #    entradaFecha4.limpiar_fecha()
-            #    entradaFecha5.limpiar_fecha()
-            #    entradaFecha6.limpiar_fecha()
-                print(self.get_lista_id_calendario())
-        #        return lista_idEscuela, lista_idCargo, lista_idPerfil, lista_idCalendario"""
+            
+                entradaFecha1.limpiar_fecha()
+                entradaFecha2.limpiar_fecha()
+                entradaFecha3.limpiar_fecha()
+                entradaFecha4.limpiar_fecha()
+                entradaFecha5.limpiar_fecha()
+                entradaFecha6.limpiar_fecha()
 
