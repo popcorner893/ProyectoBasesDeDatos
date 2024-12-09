@@ -3,6 +3,8 @@ import tkinter as tk
 from PIL import Image
 from Utilidades import *
 import PantallaPrincipalAspirante, PantallaPrincipalEmpleado
+import sesionActual
+import conectarMySql
 
 
 class PantallaPerfilEmpleado(CTkFrame):
@@ -10,7 +12,7 @@ class PantallaPerfilEmpleado(CTkFrame):
     def __init__(self, parent, controller):
         
         super().__init__(parent, fg_color="white") 
-
+        conexion = conectarMySql.MiConexion()
         self.controller = controller
         
         self.columnconfigure((0,1), weight=1)
@@ -99,12 +101,14 @@ class PantallaPerfilEmpleado(CTkFrame):
 
         #Etiquetas de nombres y nivel de acceso
 
-
-        nombrePerfil = CTkLabel(panelNombre, text = "Nombre Usuario - Perfil", font=("Labrada", 40))
+        username = sesionActual.sesionActualEmpleado.username
+        nombrePerfil = CTkLabel(panelNombre, text = username+" - Perfil", font=("Labrada", 40))
         nombrePerfil.pack(anchor = "nw")
 
-        textoPublicacion = CTkLabel(panelNombre, text = "Aspirante / Nivel de Acceso", font=("Labrada", 20))
+        nivelAcceso= sesionActual.sesionActualEmpleado.nivelAceso
+        textoPublicacion = CTkLabel(panelNombre, text = "Empleado / "+nivelAcceso, font=("Labrada", 20))
         textoPublicacion.pack(anchor = "nw", padx = 10)
+
 
 
         #Panel de Información Detallada del Usuario
@@ -150,10 +154,11 @@ class PantallaPerfilEmpleado(CTkFrame):
         tituloNombre = smallText(panelNombre1, "Nombre")
         tituloNombre.pack(side = "left", padx = 30)
 
+        triplaNombre = conexion.get_list_full_name_empleado(username)
 
         nombreLabel = CTkEntry(
             panelIzquierdo1,
-            placeholder_text= "Nombre",
+            placeholder_text= triplaNombre[0],
             justify = CENTER,
             font= ("Labrada", 20),
             placeholder_text_color= "black",
@@ -201,7 +206,7 @@ class PantallaPerfilEmpleado(CTkFrame):
 
         apellido1Label = CTkEntry(
             panelApellidos,
-            placeholder_text= "apellido_1",
+            placeholder_text= triplaNombre[1],
             justify = CENTER,
             font= ("Labrada", 20),
             placeholder_text_color= "black",
@@ -214,7 +219,7 @@ class PantallaPerfilEmpleado(CTkFrame):
 
         apellido2Label = CTkEntry(
             panelApellidos,
-            placeholder_text= "apellido_2",
+            placeholder_text= triplaNombre[2],
             justify = CENTER,
             font= ("Labrada", 20),
             placeholder_text_color= "black",
@@ -230,14 +235,15 @@ class PantallaPerfilEmpleado(CTkFrame):
 
         panelCiudad = CTkFrame(panelIzquierdo1, fg_color="transparent")
         panelCiudad.pack(anchor = "nw", fill = "x")
-
+        
         tituloCiudad = smallText(panelCiudad, "Ciudad")
         tituloCiudad.pack(side = "left", padx = 30)
 
 
+        ciudad = conexion.get_ciudad_empleado(username) #obtiene la ciudad del empleado
         ciudadLabel = CTkEntry(
             panelIzquierdo1,
-            placeholder_text= "Ciudad",
+            placeholder_text= ciudad,
             justify = CENTER,
             font= ("Labrada", 20),
             placeholder_text_color= "black",
@@ -435,8 +441,7 @@ class PantallaPerfilAspirante(CTkFrame):
 
         tituloNombre = smallText(panelNombre1, "Nombre")
         tituloNombre.pack(side = "left", padx = 30)
-
-
+        
         nombreLabel = CTkEntry(
             panelIzquierdo1,
             placeholder_text= "Nombre",
