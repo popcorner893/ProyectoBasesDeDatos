@@ -2,7 +2,8 @@ import customtkinter as ctk
 import tkinter as tk
 from PIL import Image
 from Utilidades import *
-import PantallaPrincipalEmpleado, PantallaPerfil
+import PantallaPrincipalEmpleado, PantallaPerfil, Convocatoria, conectarMySql
+import tkinter.messagebox as messagebox
 
 
 class AnadirCargo(CTkFrame):
@@ -15,8 +16,16 @@ class AnadirCargo(CTkFrame):
 
         self.controller = controller
 
+        self.mi_conexion = conectarMySql.MiConexion()
+
         self.columnconfigure((0,1), weight=1)
         self.rowconfigure(0, weight=1)
+
+        self.lista_idEscuela = []
+        self.lista_idCargo = []
+        self.lista_idPerfil = []
+
+        self.lista_idCalendario = []
 
 
 
@@ -66,7 +75,7 @@ class AnadirCargo(CTkFrame):
 
         #Ícono para volver atrás
         iconBack = CTkImage(dark_image= Image.open("BackSymbol1.png"), size = (51,51))
-        img_lab1 = CTkButton(panelUsuario, image=iconBack, text="", bg_color="white", fg_color="white", width=51, height=51, hover_color = "white", command=lambda: self.controller.show_frame(PantallaPrincipalEmpleado.MenuPrincipalUsuario))
+        img_lab1 = CTkButton(panelUsuario, image=iconBack, text="", bg_color="white", fg_color="white", width=51, height=51, hover_color = "white", command=lambda: self.controller.show_frame(Convocatoria.AbrirConvocatoria))
         img_lab1.pack(side = "left", padx = 20, pady = 10)
 
 
@@ -175,5 +184,56 @@ class AnadirCargo(CTkFrame):
 
         #Botón para subir
 
-        botonSubir = botonAccion(panelScrollable, "Añadir Concurso para Cargo", 20, "verde", 320, 35, lambda: None)
+        botonSubir = botonAccion(panelScrollable, "Añadir Concurso para Cargo", 20, "verde", 320, 35, lambda: Accion())
         botonSubir.pack(anchor = "nw", padx = 40, pady = 20)
+
+        def Accion():
+            cargoQuery = nombreCargo.entradaTexto.get()
+            escuelaQuery = escuela.entradaTexto.get()
+            DisciplinaQuery = areaDisciplinar.entradaTexto.get()
+            titulacionQuery = titulacion.entradaTexto.get()
+            expQuery = experiencia.entradaTexto.get()
+            areaQuery = areaAcademica.entradaTexto.get()
+            modalidadQuery = modalidad.entradaTexto.get()
+            compromisoQuery = compromiso.entradaTexto.get()
+            fechaIniCQuery = entradaFecha1.fecha_seleccionada
+            fechaFinCQuery = entradaFecha2.fecha_seleccionada
+            fechaHDVQuery = entradaFecha3.fecha_seleccionada
+            fechaPsiQuery = entradaFecha4.fecha_seleccionada
+            fechaSDQuery = entradaFecha5.fecha_seleccionada
+            fechaEntQuery = entradaFecha6.fecha_seleccionada 
+            if not cargoQuery.strip() or not escuelaQuery.strip() or not DisciplinaQuery.strip() or not titulacionQuery.strip() or not expQuery.strip() or not areaQuery.strip() or not modalidadQuery.strip() or not compromisoQuery.strip() or not fechaIniCQuery or not fechaFinCQuery or not fechaHDVQuery or not fechaPsiQuery or not fechaSDQuery or not fechaEntQuery:
+                messagebox.showerror("Error", "Alguno de los campos se encuentra vacío")
+            else:
+            
+        
+                idModalidad = self.mi_conexion.obtener_Modalidad(modalidadQuery)
+                idEscuela = self.mi_conexion.obtener_o_insertar_escuela(escuelaQuery)
+                idCargo = self.mi_conexion.obtener_o_insertar_cargo(cargoQuery, idEscuela)
+                idPerfil = self.mi_conexion.obtener_o_insertar_perfil(DisciplinaQuery,titulacionQuery,expQuery,areaQuery,compromisoQuery,idModalidad)
+                idCalendario = self.mi_conexion.obtener_o_insertar_perfil(fechaIniCQuery,fechaHDVQuery,fechaPsiQuery,fechaSDQuery,fechaEntQuery,fechaFinCQuery)
+                
+                self.lista_idEscuela.append(idEscuela)
+                self.lista_idCargo.append(idCargo)
+                self.lista_idPerfil.append(idPerfil)
+                self.lista_idCalendario.append(idCalendario)
+
+                nombreCargo.entradaTexto.delete(0, 'end')
+                escuela.entradaTexto.delete(0, 'end')
+                areaDisciplinar.entradaTexto.delete(0, 'end')
+                titulacion.entradaTexto.delete(0, 'end')
+                experiencia.entradaTexto.delete(0, 'end')
+                areaAcademica.entradaTexto.delete(0, 'end')
+                modalidad.entradaTexto.delete(0, 'end')
+                compromiso.entradaTexto.delete(0, 'end')
+            """  
+            (No se si funciona)
+                 entradaFecha1.limpiar_fecha()
+            #    entradaFecha2.limpiar_fecha()
+            #    entradaFecha3.limpiar_fecha()
+            #    entradaFecha4.limpiar_fecha()
+            #    entradaFecha5.limpiar_fecha()
+            #    entradaFecha6.limpiar_fecha()
+                print(self.get_lista_id_calendario())
+        #        return lista_idEscuela, lista_idCargo, lista_idPerfil, lista_idCalendario"""
+
