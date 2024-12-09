@@ -899,7 +899,7 @@ class MiConexion:
             sql_select = """
             SELECT idPerfil 
             FROM Perfil 
-            WHERE areaD = %s AND titu = %s AND exp = %s AND areaA = %s AND compromiso = %s AND modalidad = %s
+            WHERE areaDisciplinar = %s AND titulacionRequerida = %s AND experiencia = %s AND areaAcademica = %s AND compromisoFormacion = %s AND idModalidad = %s
             """
             cur.execute(sql_select, (areaD, titu, exp, areaA, compromiso, modalidad))
             resultado = cur.fetchone()
@@ -910,7 +910,7 @@ class MiConexion:
             else:
             # Si no existe, insertar el nuevo perfil
                 sql_insert = '''
-                INSERT INTO Perfil (areaD, titu, exp, areaA, compromiso, modalidad)
+                INSERT INTO Perfil (areaDisciplinar, titulacionRequerida, experiencia, areaAcademica, compromisoFormacion, idModalidad)
                 VALUES (%s, %s, %s, %s, %s, %s)
                 '''
                 cur.execute(sql_insert, (areaD, titu, exp, areaA, compromiso, modalidad))
@@ -959,10 +959,43 @@ class MiConexion:
             else:
             # Si no existe, insertar el nuevo perfil
                 sql_insert = '''
-                INSERT INTO Perfil (areaD, titu, exp, areaA, compromiso, modalidad)
+                INSERT INTO cronogramaactividades (fechainicio, fechaHojasDeVida, fechaPsicotecnica, fechaSesionDocente, fechaEntrevista, fechaFin)
                 VALUES (%s, %s, %s, %s, %s, %s)
                 '''
                 cur.execute(sql_insert, (fechainicio, fechaHojasDeVida, fechaPsicotecnica, fechaSesionDocente, fechaEntrevista, fechaFin))
+                self.conexion.commit()
+                return cur.lastrowid
+        except Exception as e:
+        # Manejo de errores
+            self.conexion.rollback()
+            messagebox.showerror("Error", f"Error al procesar el perfil: {e}")
+        finally:
+            cur.close()
+
+    def obtener_o_insertar_calendarioConv(self, fechainicio, fechafin):
+        try:
+        # Conexión a la base de datos
+            cur = self.conexion.cursor()
+
+        # Verificar si el perfil ya existe
+            sql_select = """
+            SELECT idCalendario 
+            FROM calendarioconvocatoria 
+            WHERE fechainicio = %s AND fechaFin = %s
+            """
+            cur.execute(sql_select, (fechainicio, fechafin))
+            resultado = cur.fetchone()
+
+            if resultado:
+            # Si existe, devolver el ID del perfil
+                return resultado[0]
+            else:
+            # Si no existe, insertar el nuevo perfil
+                sql_insert = '''
+                INSERT INTO cronogramaactividades (fechainicio, fechaFin)
+                VALUES (%s, %s)
+                '''
+                cur.execute(sql_insert, (fechainicio, fechafin))
                 self.conexion.commit()
                 return cur.lastrowid
         except Exception as e:
