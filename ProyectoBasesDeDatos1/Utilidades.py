@@ -162,11 +162,11 @@ class formularioSimple(CTkFrame):
     def __init__(self, parent, titulo):
         super().__init__(parent, fg_color="transparent", corner_radius=16)
 
-        tituloLab = mediumText(self, titulo)
-        tituloLab.pack(anchor = "nw")
+        self.tituloLab = mediumText(self, titulo)
+        self.tituloLab.pack(anchor = "nw")
 
-        entradaTexto = CTkEntry(self, width = 500, height = 50, corner_radius= 16, border_width=0, fg_color= "white", font = (("Labrada", 20)), justify = "left")
-        entradaTexto.pack(anchor = "nw", pady = 20)
+        self.entradaTexto = CTkEntry(self, width = 500, height = 50, corner_radius= 16, border_width=0, fg_color= "white", font = (("Labrada", 20)), justify = "left")
+        self.entradaTexto.pack(anchor = "nw", pady = 20)
 
 
 
