@@ -56,8 +56,6 @@ class MenuPrincipalUsuario(CTkFrame):
         img_lab1 = CTkButton(panelUsuario, image=iconBack, text="", bg_color="white", fg_color="white", width=51, height=51, hover_color = "white", command=lambda: goback())
         img_lab1.pack(side = "left", padx = 20, pady = 10)
 
-
-        #Creo que aquí esta el problema al cerrar sesión
         def goback():
             Login.sesionActual.sesionActualEmpleado.cerrarSesion()
             self.controller.show_frame(Login.MainLogin)
@@ -79,7 +77,7 @@ class MenuPrincipalUsuario(CTkFrame):
 
 
         #Mensaje de Bienvenida
-        bienvenidaTexto = bigText(panelScrollable, f"BIENVENIDO, {sesionActual.sesionActualEmpleado.username}")
+        bienvenidaTexto = bigText(panelScrollable, f"BIENVENIDO, {Login.sesionActual.sesionActualEmpleado.username}")
         bienvenidaTexto.pack(anchor = "nw", padx = 50)
 
         #Qué desea hacer?
@@ -100,7 +98,7 @@ class MenuPrincipalUsuario(CTkFrame):
             panelOpciones2.pack(expand = True, fill = "x", padx = 50, pady = 20)
             panelOpciones2.pack_propagate(False)
             
-            panelIzquierdo1 = frameOpcion(panelOpciones1, "Abrir Convocatoria", "AbrirConvocatoriaIcon",1, self.controller)
+            panelIzquierdo1 = frameOpcion(panelOpciones1, "Convocatoria", "AbrirConvocatoriaIcon",1, self.controller)
             panelIzquierdo1.pack(expand = True, side = "left")
             panelIzquierdo1.pack_propagate(False)
 
@@ -118,13 +116,9 @@ class MenuPrincipalUsuario(CTkFrame):
             panelOpciones1.pack(expand = True, fill = "x", padx = 50, pady = 20)
             panelOpciones1.pack_propagate(False)
             
-            panelIzquierdo1 = frameOpcion(panelOpciones1, "Abrir Convocatoria", "AbrirConvocatoriaIcon",1, self.controller)
+            panelIzquierdo1 = frameOpcion(panelOpciones1, "Evaluar Inscripciones", "EvaluarInscripcionesIcon",2, self.controller)
             panelIzquierdo1.pack(expand = True, side = "left")
             panelIzquierdo1.pack_propagate(False)
-
-            panelDerecho1 = frameOpcion(panelOpciones1, "Evaluar Inscripciones", "EvaluarInscripcionesIcon",2, self.controller)
-            panelDerecho1.pack(expand = True, side = "left")
-            panelDerecho1.pack_propagate(False)
 
 
         if sesionActual.sesionActualEmpleado.nivelAceso == "Comité Evaluación":
@@ -156,13 +150,9 @@ class MenuPrincipalUsuario(CTkFrame):
             panelOpciones1.pack(expand = True, fill = "x", padx = 50, pady = 20)
             panelOpciones1.pack_propagate(False)
             
-            panelIzquierdo1 = frameOpcion(panelOpciones1, "Abrir Convocatoria", "AbrirConvocatoriaIcon",1, self.controller)
+            panelIzquierdo1 = frameOpcion(panelOpciones1, "Finalizar Convocatoria", "FinalizarConvocatoriaIcon",6, self.controller)
             panelIzquierdo1.pack(expand = True, side = "left")
             panelIzquierdo1.pack_propagate(False)
-
-            panelDerecho1 = frameOpcion(panelOpciones1, "Finalizar Convocatoria", "FinalizarConvocatoriaIcon",6, self.controller)
-            panelDerecho1.pack(expand = True, side = "left")
-            panelDerecho1.pack_propagate(False)
         
         
 class frameOpcion(CTkFrame):
