@@ -3,6 +3,7 @@ import tkinter as tk
 from PIL import Image
 from Utilidades import *
 import PantallaPrincipalEmpleado, PantallaPerfil, AnadirMiembro, Login, conectarMySql, Cargo
+from Cargo import AnadirCargo
 
 
 
@@ -110,7 +111,7 @@ class AbrirConvocatoria(CTkFrame):
         entradaCargo2 = entradaLista(cargosFrame, "Pescador", "Ing. Pesquería", "Jóvenes Talentos", "2005-06-11", "2005-06-11")
         entradaCargo2.pack(anchor = "nw", pady = 20, expand = True, fill = "x")
 
-        addCargo = botonAccion(cargosFrame, "Añadir Cargo", 20, "verde", 220, 34, lambda: self.controller.show_frame(Cargo.AnadirCargo))
+        addCargo = botonAccion(cargosFrame, "Añadir Cargo", 20, "verde", 220, 34, lambda: ventanaSobreVentana())
         addCargo.pack(anchor = "nw",padx = 20, pady = 20)
 
         #Seleccion de Fechas
@@ -165,7 +166,7 @@ class AbrirConvocatoria(CTkFrame):
         iconoSubir = icono(panelSubirHoja, "UploadIcon1", 30, 30)
         iconoSubir.pack(side = "left")
 
-        botonSubir = botonAccion(panelSubirHoja, "Subir Nuevo Archivo", 20, "verde", 320, 34, lambda: self.seleccionar_archivo())
+        botonSubir = botonAccion(panelSubirHoja, "Subir Nuevo Archivo", 20, "verde", 320, 34, lambda: seleccionar_archivo())
         botonSubir.pack(side = "left", padx = 20)
 
 
@@ -186,31 +187,51 @@ class AbrirConvocatoria(CTkFrame):
         iconoSubir1 = icono(panelSubirHoja1, "UploadIcon1", 30, 30)
         iconoSubir1.pack(side = "left")
 
-        botonSubir1 = botonAccion(panelSubirHoja1, "Subir Nuevo Archivo", 20, "verde", 320, 34, lambda: self.sls())
+        botonSubir1 = botonAccion(panelSubirHoja1, "Subir Nuevo Archivo", 20, "verde", 320, 34, lambda: seleccionar_img())
         botonSubir1.pack(side = "left", padx = 20)
 
         #Botón Final
 
-        botonSubirConvocatoria = botonAccion(panelScrollable, "Subir Convocatoria", 33, "verde", 470, 60, lambda: None)
+        botonSubirConvocatoria = botonAccion(panelScrollable, "Subir Convocatoria", 33, "verde", 470, 60, lambda: asa())
         botonSubirConvocatoria.pack(anchor = "nw", padx = 20)
 
-    def seleccionar_archivo(self):
+        def ventanaSobreVentana():
+
+            nueva_ventana = CTkToplevel(self)
+            nueva_ventana.title("Añadir cargo(s)")
+            nueva_ventana.geometry("1280x720")
+            nueva_ventana.resizable(False,False)
+
+            anadircargo = AnadirCargo(nueva_ventana)
+            anadircargo.pack(expand = True, fill = "both")
+
+            conv = self.idConvocatoria
+
+
+        def seleccionar_archivo():
 
         # Abre el explorador de archivos y guarda la ruta seleccionada
-        archivo = filedialog.askopenfilename(title="Selecciona un archivo")
-        if archivo:  # Si se seleccionó un archivo
-            self.ruta_archivo = archivo
-            self.idAcuerdo = self.mi_conexion.insertar_datos_acuerdo(self.ruta_archivo)
+            archivo = filedialog.askopenfilename(title="Selecciona un archivo")
+            if archivo:  # Si se seleccionó un archivo
+                self.ruta_archivo = archivo
+                self.idAcuerdo = self.mi_conexion.insertar_datos_acuerdo(self.ruta_archivo)
 
-    def sls(self):
+        def seleccionar_img():
 
-        """
-        (Prueba, necesito que traiga las listas de pantalla Cargo)
-        
-        #print(self.idAcuerdo)
-        lista_idCalendario = Cargo.AnadirCargo.get_lista_id_calendario(self)
-        print("Lista idCalendario", lista_idCalendario)"""""
+        # Abre el explorador de archivos y guarda la ruta seleccionada para la publicacion "imagenconv"
+            self.img = filedialog.askopenfilename(title="Selecciona un archivo")
+            if self.img:  # Si se seleccionó un archivo
+                self.ruta_archivo = self.img
+                self.mi_conexion.insertar_datos_acuerdo(self.ruta_archivo)
 
+        # creo la convocatoria
+        def asa():
+            nombreConvQuery = entradaTexto.get()
+            fechaInicioConv = entradaFecha1.fecha_seleccionada
+            fechaFinConv = entradaFecha2.fecha_seleccionada
+            idCalendarioQuery = self.mi_conexion.insertar_datos_calendario(fechaInicioConv,fechaFinConv)
+
+            self.idConvocatoria = self.mi_conexion.insertar_datos_convocatoria(nombreConvQuery, idCalendarioQuery, self.idAcuerdo, self.img)
 
 
 
