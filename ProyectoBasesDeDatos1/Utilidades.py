@@ -123,6 +123,12 @@ class entradaFecha(CTkFrame):
         # Cerrar la ventana emergente
         self.ventana_calendario.destroy()
 
+    #No se si funciona
+    
+    def limpiar_fecha(self):
+        self.fecha_seleccionada = None
+        self.seleccionarFecha.configure(None)
+
 
 class entradaLista(CTkFrame):
     def __init__(self, parent, text1, text2, text3, text4, text5):
