@@ -127,7 +127,7 @@ class entradaFecha(CTkFrame):
     
     def limpiar_fecha(self):
         self.fecha_seleccionada = None
-        self.seleccionarFecha.configure(None)
+        self.seleccionarFecha.configure(text="")
 
 
 class entradaLista(CTkFrame):
