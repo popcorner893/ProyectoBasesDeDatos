@@ -301,6 +301,8 @@ class PantallaPerfilAspirante(CTkFrame):
     def __init__(self, parent, controller):
         
         super().__init__(parent, fg_color="white") 
+        
+        conexion = conectarMySql.MiConexion()
 
         self.controller = controller
 
@@ -391,11 +393,12 @@ class PantallaPerfilAspirante(CTkFrame):
 
         #Etiquetas de nombres y nivel de acceso
 
+        username = sesionActual.sesionActualAspirante.username
 
-        nombrePerfil = CTkLabel(panelNombre, text = "Nombre Usuario - Perfil", font=("Labrada", 40))
+        nombrePerfil = CTkLabel(panelNombre, text = username+" - Perfil", font=("Labrada", 40))
         nombrePerfil.pack(anchor = "nw")
 
-        textoPublicacion = CTkLabel(panelNombre, text = "Aspirante / Nivel de Acceso", font=("Labrada", 20))
+        textoPublicacion = CTkLabel(panelNombre, text = "Aspirante", font=("Labrada", 20))
         textoPublicacion.pack(anchor = "nw", padx = 10)
 
 
@@ -442,9 +445,11 @@ class PantallaPerfilAspirante(CTkFrame):
         tituloNombre = smallText(panelNombre1, "Nombre")
         tituloNombre.pack(side = "left", padx = 30)
         
+        triplaNombre = conexion.get_list_full_name_aspirante(username)
+        
         nombreLabel = CTkEntry(
             panelIzquierdo1,
-            placeholder_text= "Nombre",
+            placeholder_text= triplaNombre[0],
             justify = CENTER,
             font= ("Labrada", 20),
             placeholder_text_color= "black",
@@ -492,7 +497,7 @@ class PantallaPerfilAspirante(CTkFrame):
 
         apellido1Label = CTkEntry(
             panelApellidos,
-            placeholder_text= "apellido_1",
+            placeholder_text= triplaNombre[1],
             justify = CENTER,
             font= ("Labrada", 20),
             placeholder_text_color= "black",
@@ -505,7 +510,7 @@ class PantallaPerfilAspirante(CTkFrame):
 
         apellido2Label = CTkEntry(
             panelApellidos,
-            placeholder_text= "apellido_2",
+            placeholder_text= triplaNombre[2],
             justify = CENTER,
             font= ("Labrada", 20),
             placeholder_text_color= "black",
@@ -522,13 +527,15 @@ class PantallaPerfilAspirante(CTkFrame):
         panelCiudad = CTkFrame(panelIzquierdo1, fg_color="transparent")
         panelCiudad.pack(anchor = "nw", fill = "x")
 
+        ciudad = conexion.get_ciudad_aspirante(username)
+        
         tituloCiudad = smallText(panelCiudad, "Ciudad")
         tituloCiudad.pack(side = "left", padx = 30)
 
 
         ciudadLabel = CTkEntry(
             panelIzquierdo1,
-            placeholder_text= "Ciudad",
+            placeholder_text= ciudad,
             justify = CENTER,
             font= ("Labrada", 20),
             placeholder_text_color= "black",
@@ -579,3 +586,4 @@ class PantallaPerfilAspirante(CTkFrame):
 
         botonSubir = botonAccion(panelSubirHoja, "Subir Nuevo Archivo", 20, "verde", 320, 34, lambda: None)
         botonSubir.pack(side = "left")
+
