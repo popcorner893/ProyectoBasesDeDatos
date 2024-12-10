@@ -1,4 +1,5 @@
 import pymysql
+import tkinter.messagebox as messagebox
 
 class MiConexion:
 	
