@@ -154,6 +154,7 @@ class IngresoAspirante(CTkFrame):
             font= ("Labrada", 27),
             placeholder_text_color= "black",
             fg_color = "white",
+            show="*"
             )
              
         ingreso = CTkButton(
@@ -273,6 +274,7 @@ class IngresoEmpleados(CTkFrame):
             font= ("Labrada", 27),
             placeholder_text_color= "black",
             fg_color = "white",
+            show="*"
             )
              
         ingreso = CTkButton(
