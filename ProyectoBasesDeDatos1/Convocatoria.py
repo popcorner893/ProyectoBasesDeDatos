@@ -1,12 +1,3 @@
-import customtkinter as ctk
-import tkinter as tk
-from PIL import Image
-from Utilidades import *
-import PantallaPrincipalEmpleado, PantallaPerfil, AnadirMiembro, Login, conectarMySql, Cargo
-from Cargo import AnadirCargo
-
-
-
 class AbrirConvocatoria(CTkFrame):
 
 
@@ -108,10 +99,10 @@ class AbrirConvocatoria(CTkFrame):
         entradaCargo1 = entradaLista(cargosFrame, "Nombre Cargo", "Escuela", "Modalidad", "Fecha Inicio", "Fecha Fin")
         entradaCargo1.pack(anchor = "nw", pady = 20, expand = True, fill = "x")
 
-        entradaCargo2 = entradaLista(cargosFrame, "Pescador", "Ing. Pesquería", "Jóvenes Talentos", "2005-06-11", "2005-06-11")
+        entradaCargo2 = entradaLista(cargosFrame, "", "", "", "", "")
         entradaCargo2.pack(anchor = "nw", pady = 20, expand = True, fill = "x")
 
-        addCargo = botonAccion(cargosFrame, "Añadir Cargo", 20, "verde", 220, 34, lambda: ventanaSobreVentana())
+        addCargo = botonAccion(cargosFrame, "Añadir Cargo", 20, "verde", 220, 34, lambda: cargoSobreVentana())
         addCargo.pack(anchor = "nw",padx = 20, pady = 20)
 
         #Seleccion de Fechas
@@ -139,13 +130,13 @@ class AbrirConvocatoria(CTkFrame):
         miembrosFrame = CTkFrame(panelScrollable, fg_color= "white", bg_color= "transparent", corner_radius= 16)
         miembrosFrame.pack(anchor = "nw", padx = 20, fill = "x", pady = 20, expand = True)
 
-        entradaComite1 = entradaLista(miembrosFrame, "nombre", "apellido1", "apellido2", "ciudad", "idEmpleado")
+        entradaComite1 = entradaLista(miembrosFrame, "", "", "", "", "")
         entradaComite1.pack(anchor = "nw", pady = 20, expand = True, fill = "x")
 
-        entradaComite2 = entradaLista(miembrosFrame, "nombre", "apellido1", "apellido2", "ciudad", "idEmpleado")
+        entradaComite2 = entradaLista(miembrosFrame, "", "", "", "", "")
         entradaComite2.pack(anchor = "nw", pady = 20, expand = True, fill = "x")
 
-        addMiembro = botonAccion(miembrosFrame, "Añadir Miembro", 20, "verde", 220, 34, lambda: self.controller.show_frame(AnadirMiembro.AnadirMiembro))
+        addMiembro = botonAccion(miembrosFrame, "Añadir Miembro", 20, "verde", 220, 34, lambda: comiteSobreVentana())
         addMiembro.pack(anchor = "nw",padx = 20, pady = 20)
 
 
@@ -195,17 +186,39 @@ class AbrirConvocatoria(CTkFrame):
         botonSubirConvocatoria = botonAccion(panelScrollable, "Subir Convocatoria", 33, "verde", 470, 60, lambda: asa())
         botonSubirConvocatoria.pack(anchor = "nw", padx = 20)
 
-        def ventanaSobreVentana():
 
-            nueva_ventana = CTkToplevel(self)
-            nueva_ventana.title("Añadir cargo(s)")
-            nueva_ventana.geometry("1280x720")
-            nueva_ventana.resizable(False,False)
+        def comiteSobreVentana():
+            if not hasattr(self, 'idConvocatoria') or self.idConvocatoria is None:
+                messagebox.showerror("Error", "Debe ingresar primero una convocatoria")
+            else:
+                self.idComite = self.mi_conexion.insertar_datos_comite()
+                nueva_ventanaC = CTkToplevel(self)
+                nueva_ventanaC.title("Añadir comite")
+                nueva_ventanaC.geometry("1280x720")
+                nueva_ventanaC.resizable(False,False)
+                idComite = self.idComite
+                anadirMiembro = AnadirMiembro.AnadirMiembro(nueva_ventanaC, idComite)
+                anadirMiembro.pack(expand=True, fill = "both")
 
-            anadircargo = AnadirCargo(nueva_ventana)
-            anadircargo.pack(expand = True, fill = "both")
 
-            conv = self.idConvocatoria
+
+        def cargoSobreVentana():
+            
+            if not hasattr(self, 'idConvocatoria') or self.idConvocatoria is None:
+                messagebox.showerror("Error", "Debe ingresar primero una convocatoria")
+            elif not hasattr(self,'idComite') or self.idComite is None:
+                messagebox.showerror("Error", "Debe ingresar primero un comite")
+            else:
+                nueva_ventana = CTkToplevel(self)
+                nueva_ventana.title("Añadir cargo(s)")
+                nueva_ventana.geometry("1280x720")
+                nueva_ventana.resizable(False,False)
+                idConvocatoria = self.idConvocatoria
+                idComite = self.idComite
+                anadircargo = Cargo.AnadirCargo(nueva_ventana,idConvocatoria,idComite)
+                anadircargo.pack(expand = True, fill = "both")
+
+            
 
 
         def seleccionar_archivo():
@@ -222,16 +235,17 @@ class AbrirConvocatoria(CTkFrame):
             self.img = filedialog.askopenfilename(title="Selecciona un archivo")
             if self.img:  # Si se seleccionó un archivo
                 self.ruta_archivo = self.img
-                self.mi_conexion.insertar_datos_acuerdo(self.ruta_archivo)
 
         # creo la convocatoria
         def asa():
             nombreConvQuery = entradaTexto.get()
             fechaInicioConv = entradaFecha1.fecha_seleccionada
             fechaFinConv = entradaFecha2.fecha_seleccionada
-            idCalendarioQuery = self.mi_conexion.insertar_datos_calendario(fechaInicioConv,fechaFinConv)
-
-            self.idConvocatoria = self.mi_conexion.insertar_datos_convocatoria(nombreConvQuery, idCalendarioQuery, self.idAcuerdo, self.img)
+            if not nombreConvQuery.strip() or not fechaInicioConv or not fechaFinConv or not self.img or not self.ruta_archivo:
+                messagebox.showerror("Error", "Alguno de los campos se encuentra vacío")
+            else:    
+                idCalendarioQuery = self.mi_conexion.insertar_datos_calendario(fechaInicioConv,fechaFinConv)
+                self.idConvocatoria = self.mi_conexion.insertar_datos_convocatoria(nombreConvQuery, idCalendarioQuery, self.idAcuerdo, self.img)
 
 
 
