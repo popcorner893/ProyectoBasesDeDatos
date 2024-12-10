@@ -20,17 +20,11 @@ class AnadirCargo(CTkFrame):
         self.columnconfigure((0,1), weight=1)
         self.rowconfigure(0, weight=1)
 
-        # Crear canvas para manejar la imagen y el texto
-        canvas = tk.Canvas(self, width=640, height=721, highlightthickness=0)
-        canvas.pack(fill="both", expand=True)
-
-        #Imagen de Fondo
-        self.img_fondo = tk.PhotoImage(file="FondoDegradadoMain.png")  # Mantener referencia a la imagen
-        canvas.create_image(0, 0, image=self.img_fondo, anchor="nw")  # Colocar la imagen en la esquina superior izquierda     
-
+        imagenFondo = icono(self, "FondoDegradadoMain", 1280, 720)
+        imagenFondo.place(relx = 0, rely = 0, anchor = "nw")    
 
         frameBlancoFondo = CTkFrame(
-            canvas,
+            self,
             bg_color= "white",
             fg_color= "white",
             corner_radius=20,
