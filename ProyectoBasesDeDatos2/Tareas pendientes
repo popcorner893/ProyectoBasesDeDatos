@@ -1,0 +1,44 @@
+Pantalla Principal Aspirantes:
+- Botón Ir: Inscribirse al concurso 
+- Botón descargar reporetes: generar el pdf y descargarlo de la publicación correspondiente
+- Poner botón en la publicación para realizar la reclamación
+
+Pantalla Perfil
+- Descargar Hoja de vida
+- Botón para actualizar la hoja de vida
+
+Realizar Reclamación:
+- Botón subir archivo para subir el path del archivo y guardarlo
+- Botón para subir la reclamación
+
+Convocatoria:
+- Subir archivos en la convocatoria
+- Subir la convocatoria
+
+Añadir Cargo:
+- Botón para añadir el concurso 
+
+Añadir miembro:
+- Botón para añadir el miembro al comité de evaluación
+
+Revisar Inscripciones:
+- Descargar el archivo de la hoja
+- Configurar los botones para aprobar/rechazar la inscripción
+
+Reclamación Revisar:
+- Descargar el archivo adjunto de la reclamación 
+- Botones para aprobarla o rechazarla
+
+Realizar Evaluación:
+- Obtener el total de todos los puntajes
+
+Cuestionarios:
+
+- Obtener el puntaje de cada pantalla y aplicarles el ponderamiento que se especifica en el documento
+- Ventana toplevel para ver las matrices de valoración para cada cuestionario
+
+Gestión de Usuario:
+Tomar cada uno de los valores de las entradas y ejecutar el query de cada gestión ---------------------------------------- HECHO
+Convocatorias Activas:
+- Subir la Imagen de la Publicación
+- Poder declarar desierto o publicar los resultados
