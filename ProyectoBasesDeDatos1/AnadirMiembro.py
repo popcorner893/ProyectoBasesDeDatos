@@ -112,4 +112,4 @@ class AnadirMiembro(CTkFrame):
                 if idNivelAcceso == 3:
                     self.mi_conexion.anadir_comite_empleado(idComite, idEmp)
                 else:
-                    messagebox.showerror("Error", "El empleado no hace parte del comite de evaluación") 
+                    messagebox.showerror("Error", "El empleado no hace parte del comite de evaluación")  
