@@ -1,10 +1,12 @@
 from customtkinter import *
+from datetime import datetime
 import tkinter as tk
 from PIL import Image
 import Login
 import PantallaPerfil
 import sesionActual
 import conectarMySql
+from fpdf import FPDF
 
 class MenuPrincipalUsuario(CTkFrame):
 
@@ -66,14 +68,17 @@ class MenuPrincipalUsuario(CTkFrame):
 
         #Ícono para volver atrás
         iconBack = CTkImage(dark_image= Image.open("BackSymbol1.png"), size = (51,51))
-        img_lab1 = CTkButton(panelUsuario, image=iconBack, text="", bg_color="white", fg_color="white", width=51, height=51, hover_color = "white", command=lambda: self.controller.show_frame(Login.MainLogin))
+        img_lab1 = CTkButton(panelUsuario, image=iconBack, text="", bg_color="white", fg_color="white", width=51, height=51, hover_color = "white", command=lambda: cerrarSesion())
         img_lab1.pack(side = "left", padx = 20, pady = 10)
-
+        
+        def cerrarSesion():
+            #GestorMain.Gestor.cerrarSesion()
+            self.controller.show_frame(Login.MainLogin)
 
         #Tarjeta de Usuario
 
         nombreUsuario = CTkButton(panelUsuario, text = sesionActual.sesionActualAspirante.username, font=("Labrada", 30), bg_color="white", fg_color="white", text_color= "black", hover_color="white", command=lambda: self.controller.show_frame(PantallaPerfil.PantallaPerfilAspirante))
-        imagenUsuario = CTkImage(dark_image= Image.open("IconoUsuarioEjemplo.png"), size = (53,53))
+        imagenUsuario = CTkImage(dark_image= Image.open("DanielLeonardo.jpeg"), size = (53,53))
         img_lab2 = CTkLabel(panelUsuario, image=imagenUsuario, text="")   
 
 
@@ -119,9 +124,11 @@ class MenuPrincipalUsuario(CTkFrame):
         textoConvocatorias.pack(anchor = "nw", padx = 20)
 
         #Crea instancias de convocatorias 
+        
         for convocatoria in conexion.get_name_id_all_convocatorias(): 
             convocatoriaPrueba = Convocatoria(panelConvocatorias)
             convocatoriaPrueba.pack(expand = True, fill = "both", padx = 30, pady = 20)
+        Convocatoria.contador=0
 
         #Subpanel de Publicaciones Recientes
 
@@ -130,17 +137,15 @@ class MenuPrincipalUsuario(CTkFrame):
 
         #Texto de Publicaciones
 
-        textoPublicaciones = CTkLabel(panelPublicaciones, text = "Publicaciones Recientes:", font=("Labrada", 35))
+        textoPublicaciones = CTkLabel(panelPublicaciones, text = "Publicaciones Recientes:", font=("Labrada", 35))  
         textoPublicaciones.pack(anchor = "nw", padx = 20)
 
         #Crea instancias de publicaciones
-
-        postulacionPrueba = Publicacion(panelPublicaciones)
-        postulacionPrueba.pack(expand = True, fill = "both", padx = 30, pady = 20)
-
-        postulacionPrueba = Publicacion(panelPublicaciones)
-        postulacionPrueba.pack(expand = True, fill = "both", padx = 30, pady = 20)
-
+        print(sesionActual.sesionActualAspirante.convocatoria)
+        for convocatoria in sesionActual.sesionActualAspirante.convocatoria:
+            postulacionPrueba = Publicacion(panelPublicaciones)
+            postulacionPrueba.pack(expand = True, fill = "both", padx = 30, pady = 20)
+        Publicacion.contador = 0
 
 
 class Postulacion(CTkFrame):
@@ -163,6 +168,7 @@ class Postulacion(CTkFrame):
         
         conexion = conectarMySql.MiConexion()
         #cargo y id del curso que se va a poner en el sub panel #"contador"
+        print("contador"+str(Postulacion.contador))
         cargo = sesionActual.sesionActualAspirante.cargos[Postulacion.contador]
         idConcurso = sesionActual.sesionActualAspirante.concursos[Postulacion.contador]
         
@@ -286,12 +292,10 @@ class Convocatoria(CTkFrame):
 
         #Añadir Instancias de Cargos
 
-        for cargo in cargosConvocatoriaActual:
-            cargoEjemplo = cargoDisponible(cargosDisponiblesFrame,cargo)
+        cargos = conexion.quitar_registros(cargosConvocatoriaActual, sesionActual.sesionActualAspirante.cargos)
+        for cargo in cargos:
+            cargoEjemplo = cargoDisponible(cargosDisponiblesFrame, ConvocatoriaActual[1], cargo)
             cargoEjemplo.pack(expand = True, fill = "both")
-
-
-
 
         #Contenido Panel Derecho
 
@@ -304,29 +308,45 @@ class Convocatoria(CTkFrame):
         Convocatoria.contador+=1
 
 
-
 class cargoDisponible (CTkFrame):
 
     #Clase para crear las postulaciones y no tener que hacerla por separado para cada una
 
-    def __init__(self, parent, nombre_cargo):
+    def __init__(self, parent, IdConvocatoria ,nombre_cargo):
         
         super().__init__(parent, fg_color="transparent", corner_radius= 16, bg_color= "transparent")
-
+        conexion = conectarMySql.MiConexion()
         nombreCargoLabel = CTkLabel(self, text = nombre_cargo, font=("Labrada", 25))
         nombreCargoLabel.pack(side = "left", padx = 26, pady = 20)
 
-        nombreCargoLabel = CTkButton(self, text = "Ir",corner_radius=16, font=("Labrada", 25), fg_color= "#02E1B5", bg_color= "transparent", text_color= "black")
+        nombreCargoLabel = CTkButton(self, text = "Inscribir",corner_radius=16, font=("Labrada", 25), fg_color= "#02E1B5", bg_color= "transparent", text_color= "black", command=lambda: cargoDisponible.crearInscripcion(nombreCargoLabel, IdConvocatoria, nombre_cargo))
         nombreCargoLabel.pack(side = "right", padx = 26, pady = 20)
+    
+    def crearInscripcion(CTkButton, IdConvocatoria, nombre_cargo):
+        # Conexión a la base de datos
+        conexion = conectarMySql.MiConexion()
 
+        # Cambiar el color y texto del botón
+        CTkButton.configure(fg_color="#FF5733", text="Inscrito", state="disabled")
 
+        # Obtener datos necesarios
+        idConcurso = conexion.encontrar_idConcurso(IdConvocatoria, nombre_cargo)
+        idAspirante = sesionActual.sesionActualAspirante.id
+        fecha_actual = datetime.now().strftime('%Y-%m-%d')
+
+        # Registrar la inscripción en la base de datos
+        conexion.inscribir_aspirante_concurso(idConcurso, idAspirante, fecha_actual)
+            
 class Publicacion(CTkFrame):
 
     #Clase para crear las postulaciones y no tener que hacerla por separado para cada una
+    contador=0 #lleva un conteo de la convocatoria en la que se encuentra
+    
 
     def __init__(self, parent):
         
         super().__init__(parent, fg_color="#DEEDFD", corner_radius= 16, bg_color= "transparent") 
+        
 
         self.columnconfigure(0, weight=7)
         self.columnconfigure(1, weight=3)
@@ -337,13 +357,22 @@ class Publicacion(CTkFrame):
 
         panelDerecho = CTkFrame(self,fg_color="transparent", corner_radius= 16)
         panelDerecho.grid(row = 0, column = 1, sticky = "nswe")  
+        
+        conexion = conectarMySql.MiConexion()
+        
+        #dupla de la forma (nombreConvocatoria, idConvocatoria)
+        ConvocatoriaActual = sesionActual.sesionActualAspirante.convocatoria[Publicacion.contador]
+        #Lista de cargos ofrecidos en la convocatoria
+        cargosConvocatoriaActual = conexion.get_cargos_convocatoria(ConvocatoriaActual)
 
-        #Contenido Panel Izquierdo    
+        #Contenido Panel Izquierdo
+        #(idPublicacion, tituloPublicacion, textoPublicacion, imagenPublicacion, idConvocatoria, archivoPublicacion)
+        datosPublicacion = conexion.get_datos_publicaciones(ConvocatoriaActual)
 
-        tituloPublicacion = CTkLabel(panelIzquierdo, text = "titulo_publicacion", font=("Labrada", 25))
+        tituloPublicacion = CTkLabel(panelIzquierdo, text = datosPublicacion[1], font=("Labrada", 25))
         tituloPublicacion.pack(anchor = "nw", padx = 26)
 
-        textoPublicacion = CTkLabel(panelIzquierdo, text = "texto_publicacion", font=("Labrada", 20))
+        textoPublicacion = CTkLabel(panelIzquierdo, text = datosPublicacion[2], font=("Labrada", 20))
         textoPublicacion.pack(anchor = "nw", padx = 30)
 
         reglamentacionLabel = CTkLabel(panelIzquierdo, text = "Se reglamenta el final de la convocatoria a través del acuerdo:", font=("Labrada", 20))
@@ -360,12 +389,11 @@ class Publicacion(CTkFrame):
         concursosFrame.pack(anchor = "nw", padx = 26, pady = 30, expand = True, fill = "both")
 
         #Añadir Instancias de concursos
-
-        concursoEjemplo1 = concursoPublicacion(concursosFrame,"Pescador")
-        concursoEjemplo1.pack(expand = True, fill = "both")
-
-        concursoEjemplo2 = concursoPublicacion(concursosFrame,"Pescador")
-        concursoEjemplo2.pack(expand = True, fill = "both")
+        
+        print(cargosConvocatoriaActual)
+        for cargo in cargosConvocatoriaActual:
+            concursoEjemplo1 = concursoPublicacion(concursosFrame, cargo, ConvocatoriaActual)
+            concursoEjemplo1.pack(expand = True, fill = "both")
 
 
         #Contenido Panel Derecho
@@ -376,6 +404,8 @@ class Publicacion(CTkFrame):
 
         imagenPublicacion = CTkLabel(frameImagen, text = "imagen_publicacion", font=("Labrada", 25))
         imagenPublicacion.pack(expand = True)
+        
+        Publicacion.contador +=1
 
 
 
@@ -383,14 +413,17 @@ class concursoPublicacion (CTkFrame):
 
     #Clase para crear las postulaciones y no tener que hacerla por separado para cada una
 
-    def __init__(self, parent, nombre_cargo):
+    def __init__(self, parent, cargo, ConvocatoriaActual):
         
         super().__init__(parent, fg_color="transparent", corner_radius= 16, bg_color= "transparent")
-
-        nombreCargoLabel = CTkLabel(self, text = nombre_cargo, font=("Labrada", 20))
+        
+        conexion = conectarMySql.MiConexion()
+        idConcurso = conexion.encontrar_idConcurso(ConvocatoriaActual, cargo)
+        
+        nombreCargoLabel = CTkLabel(self, text = cargo, font=("Labrada", 20))
         nombreCargoLabel.pack(side = "left", padx = 26, pady = 10)
 
-        nombreCargoLabel = CTkButton(self, text = "Descargar Reporte Elegibles",corner_radius=16, font=("Labrada", 25), fg_color= "#02E1B5", bg_color= "transparent", text_color= "black")
+        nombreCargoLabel = CTkButton(self, text = "Descargar Reporte Elegibles",corner_radius=16, font=("Labrada", 25), fg_color= "#02E1B5", bg_color= "transparent", text_color= "black", command = lambda:conexion.generar_pdf_desde_tabla(idConcurso))
         nombreCargoLabel.pack(side = "right", padx = 26, pady = 10)
 
         imagenDescarga = CTkImage(dark_image= Image.open("DownloadIcon.png"), size = (35,35))
