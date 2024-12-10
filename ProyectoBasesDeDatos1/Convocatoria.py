@@ -1,3 +1,10 @@
+import customtkinter as ctk
+import tkinter as tk
+from PIL import Image
+from Utilidades import *
+import PantallaPrincipalEmpleado, PantallaPerfil, AnadirMiembro, Login, conectarMySql, Cargo, AnadirMiembro
+import tkinter.messagebox as messagebox
+
 class AbrirConvocatoria(CTkFrame):
 
 
