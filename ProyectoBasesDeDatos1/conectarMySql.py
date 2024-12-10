@@ -1,10 +1,13 @@
 import pymysql
-import tkinter.messagebox as messagebox
+from tkinter import messagebox
+from fpdf import FPDF
+import os
+
 
 class MiConexion:
 	
     def __init__(self):
-        self.conexion = pymysql.connect(host='localhost', user='root', passwd='', db='basededatosprof1')
+        self.conexion = pymysql.connect(host='localhost', user='root', passwd='', db='seleccionprof')
 
     def busca_user_Aspirante(self, users):
         try:
@@ -51,7 +54,7 @@ class MiConexion:
         try:
             cur = self.conexion.cursor()
             sql = """SELECT CONCAT_WS(' ', aspirante.nombre, aspirante.apellido1, SUBSTR(aspirante.apellido2, 1, 1)) 
-                    FROM aspirante INNER JOIN usuarioaspirante ON aspirante.idAspirante = usuarioaspirante.idUsuarioAspirante 
+                    FROM aspirante INNER JOIN usuarioaspirante ON aspirante.idAspirante =  usuarioaspirante.idAspirante 
                     WHERE usuario = %s"""
             cur.execute(sql, (username,))
             return cur.fetchall()[0][0]
@@ -139,7 +142,7 @@ class MiConexion:
         try:
             cur = self.conexion.cursor()
             sql = """SELECT cargo.nombreCargo from UsuarioAspirante
-                    INNER JOIN aspirante ON aspirante.idAspirante = usuarioaspirante.idUsuarioAspirante
+                    INNER JOIN aspirante ON aspirante.idAspirante = usuarioaspirante.idAspirante
                     INNER JOIN inscripcion ON inscripcion.idAspirante = aspirante.idAspirante
                     INNER JOIN concurso ON concurso.idConcurso = inscripcion.idConcurso
                     INNER JOIN cargo ON cargo.idCargo = concurso.idCargo
@@ -147,51 +150,13 @@ class MiConexion:
             cur.execute(sql, (username,))
             listaAux = []
             for dato in cur.fetchall():
-                listaAux.append(dato)
+                listaAux.append(dato[0])
             return listaAux
             miConexion.close()
         except:
-            return ("Sin Cargos",)
+            return []
         finally:
-                cur.close()       
-    
-    #Regresa una lista con el id de  convocatorias a las que pertenece un aspirante
-    def get_convocatoria_postulado(self, username): 
-        try:
-            cur = self.conexion.cursor()
-            sql = """SELECT convocatoria.idConvocatoria from UsuarioAspirante
-                    INNER JOIN aspirante ON aspirante.idAspirante = usuarioaspirante.idUsuarioAspirante
-                    INNER JOIN inscripcion ON inscripcion.idAspirante = aspirante.idAspirante
-                    INNER JOIN concurso ON concurso.idConcurso = inscripcion.idConcurso
-                    INNER JOIN convocatoria ON convocatoria.idConvocatoria = concurso.idConvocatoria
-                    where usuarioaspirante.usuario = %s"""
-            cur.execute(sql, (username,))
-            listaAux = []
-            for dato in cur.fetchall():
-                listaAux.append(dato)
-            return listaAux
-            miConexion.close()
-        except:
-            return ("No aplica",)
-        finally:
-                cur.close()          
-    
-    #retorna una lista de duplas con los nombres y id de todas las convocatorias en la base de datos
-    #[('Convocatoria 2025-1', 1), ('Convocatoria 2025-2', 2), ('Convocatoria 2025-3', 3)]
-    def get_name_id_all_convocatorias(self):
-        try:
-            cur = self.conexion.cursor()
-            sql = """SELECT convocatoria.nombreConvocatoria, convocatoria.idConvocatoria FROM convocatoria"""
-            cur.execute(sql)
-            listaAux = []
-            for dato in cur.fetchall():
-                listaAux.append(dato)
-            return listaAux
-            miConexion.close()
-        except:
-            return [("No aplica",),("No aplica",)]
-        finally:
-                cur.close()   
+                cur.close()              
     
     #retorna una lista con los cargos que se ofrecen en una convocatoria
     def get_cargos_convocatoria(self, convocatoria):
@@ -212,38 +177,24 @@ class MiConexion:
         finally:
                 cur.close()    
     
-    def get_nivel_Acceso(self,username):
-        try:
-            cur = self.conexion.cursor()
-            sql = """SELECT nivelacceso.nombreNivel FROM usuarioempleado 
-                        INNER JOIN empleado ON empleado.idEmpleado = usuarioempleado.idEmpleado
-                        INNER JOIN nivelacceso ON nivelacceso.idNivelAcceso = empleado.idNivelAcceso
-                        where usuarioempleado.usuario = %s"""
-            cur.execute(sql, (username,))
-            return cur.fetchall()[0][0]
-            miConexion.close()
-        except:
-            return "No se encontro nivel"
-        finally:
-                cur.close()    
     
     #Regresa una lista de los Idconcursos de un aspirante atraves de su usuario
     def get_id_concurso(self,username):
         try:
             cur = self.conexion.cursor()
             sql = """SELECT concurso.idConcurso FROM usuarioaspirante 
-                        INNER JOIN aspirante ON aspirante.idAspirante = usuarioaspirante.idUsuarioAspirante
+                        INNER JOIN aspirante ON aspirante.idAspirante = usuarioaspirante.idAspirante
                         INNER JOIN inscripcion ON inscripcion.idAspirante = aspirante.idAspirante
                         INNER JOIN concurso ON concurso.idConcurso = inscripcion.idConcurso
                         where usuarioaspirante.usuario = %s"""
             cur.execute(sql, (username,))
             listaAux = []
             for dato in cur.fetchall():
-                listaAux.append(dato)
+                listaAux.append(dato[0])
             return listaAux
             miConexion.close()
         except:
-            return ("No se encontro ID",)
+            return []
         finally:
                 cur.close() 
                 
@@ -262,7 +213,7 @@ class MiConexion:
         finally:
                 cur.close() 
     
-    #Obtiene en forma de String el estao de un concurso apartir de su id  
+    #Obtiene en forma de String el estado de un concurso apartir de su id  
     def get_estado_concurso(self, idConcurso):
         try:
             cur = self.conexion.cursor()
@@ -289,64 +240,29 @@ class MiConexion:
         except:
             return ("No se encontraron fechas", "No se encontraron fechas")
         finally:
-                cur.close()                 
-    # Obtiene el nombre completo usando el username        
-    def get_full_name_aspirante(self, username):
+                cur.close()                            
+                
+    #obtiene el idAspirante apartir de su usuario
+    def get_id_aspirante(self, username):
         try:
             cur = self.conexion.cursor()
-            sql = """SELECT CONCAT_WS(' ', aspirante.nombre, aspirante.apellido1, SUBSTR(aspirante.apellido2, 1, 1)) 
+            sql = """SELECT idUsuarioAspirante
                     FROM aspirante INNER JOIN usuarioaspirante ON aspirante.idAspirante = usuarioaspirante.idUsuarioAspirante 
                     WHERE usuario = %s"""
             cur.execute(sql, (username,))
             return cur.fetchall()[0][0]
             miConexion.close()
         except:
-            return "Sin nombre"
+            return "NULL"
         finally:
                 cur.close()
-
-	# Obtiene el nombre completo usando el username       
-    def get_full_name_empleado(self, username):
-        try:
-            cur = self.conexion.cursor()
-            sql = """SELECT CONCAT_WS(' ', empleado.nombre, empleado.apellido1, SUBSTR(empleado.apellido2, 1, 1)) 
-                        FROM empleado INNER JOIN usuarioempleado ON empleado.idEmpleado = usuarioempleado.idUsuarioEmpleado 
-                    WHERE usuario = %s"""
-            cur.execute(sql, (username,))
-            return cur.fetchall()[0][0]
-            miConexion.close()
-        except:
-            return "Sin nombre"
-        finally:
-                cur.close()            
-                
-    #Regresa una lista con los cargos a los que esta aspirando un usuario            
-    def get_cargos_postulado(self, username):
-        try:
-            cur = self.conexion.cursor()
-            sql = """SELECT cargo.nombreCargo from UsuarioAspirante
-                    INNER JOIN aspirante ON aspirante.idAspirante = usuarioaspirante.idUsuarioAspirante
-                    INNER JOIN inscripcion ON inscripcion.idAspirante = aspirante.idAspirante
-                    INNER JOIN concurso ON concurso.idConcurso = inscripcion.idConcurso
-                    INNER JOIN cargo ON cargo.idCargo = concurso.idCargo
-                    where usuarioaspirante.usuario = %s"""
-            cur.execute(sql, (username,))
-            listaAux = []
-            for dato in cur.fetchall():
-                listaAux.append(dato)
-            return listaAux
-            miConexion.close()
-        except:
-            return ("Sin Cargos",)
-        finally:
-                cur.close()       
     
     #Regresa una lista con el id de  convocatorias a las que pertenece un aspirante
     def get_convocatoria_postulado(self, username): 
         try:
             cur = self.conexion.cursor()
             sql = """SELECT convocatoria.idConvocatoria from UsuarioAspirante
-                    INNER JOIN aspirante ON aspirante.idAspirante = usuarioaspirante.idUsuarioAspirante
+                    INNER JOIN aspirante ON aspirante.idAspirante = usuarioaspirante.idAspirante
                     INNER JOIN inscripcion ON inscripcion.idAspirante = aspirante.idAspirante
                     INNER JOIN concurso ON concurso.idConcurso = inscripcion.idConcurso
                     INNER JOIN convocatoria ON convocatoria.idConvocatoria = concurso.idConvocatoria
@@ -354,7 +270,7 @@ class MiConexion:
             cur.execute(sql, (username,))
             listaAux = []
             for dato in cur.fetchall():
-                listaAux.append(dato)
+                listaAux.append(dato[0])
             return listaAux
             miConexion.close()
         except:
@@ -379,25 +295,9 @@ class MiConexion:
         finally:
                 cur.close()   
     
-    #retorna una lista con los cargos que se ofrecen en una convocatoria
-    def get_cargos_convocatoria(self, convocatoria):
-        try:
-            cur = self.conexion.cursor()
-            sql = """SELECT cargo.nombreCargo FROM convocatoria 
-                    INNER JOIN concurso ON concurso.idConvocatoria = convocatoria.idConvocatoria
-                    INNER JOIN cargo On cargo.idCargo = concurso.idCargo
-                    WHERE convocatoria.idConvocatoria = %s"""
-            cur.execute(sql, (convocatoria,))
-            listaAux = []
-            for dato in cur.fetchall():
-                listaAux.append(dato[0])
-            return listaAux
-            miConexion.close()
-        except:
-            return ("No se encontraron cargos",)
-        finally:
-                cur.close()    
-    
+    def quitar_registros(self,lista_general, lista_a_quitar):
+        return [elemento for elemento in lista_general if elemento not in lista_a_quitar]
+   
     def get_nivel_Acceso(self,username):
         try:
             cur = self.conexion.cursor()
@@ -411,71 +311,109 @@ class MiConexion:
         except:
             return "No se encontro nivel"
         finally:
-                cur.close()    
-    
-    #Regresa una lista de los Idconcursos de un aspirante atraves de su usuario
-    def get_id_concurso(self,username):
+                cur.close()          
+
+    def inscribir_aspirante_concurso(self, idConcurso, idAspirante, fecha_actual):
         try:
             cur = self.conexion.cursor()
-            sql = """SELECT concurso.idConcurso FROM usuarioaspirante 
-                        INNER JOIN aspirante ON aspirante.idAspirante = usuarioaspirante.idUsuarioAspirante
-                        INNER JOIN inscripcion ON inscripcion.idAspirante = aspirante.idAspirante
-                        INNER JOIN concurso ON concurso.idConcurso = inscripcion.idConcurso
-                        where usuarioaspirante.usuario = %s"""
-            cur.execute(sql, (username,))
-            listaAux = []
-            for dato in cur.fetchall():
-                listaAux.append(dato)
-            return listaAux
-            miConexion.close()
+            sql = """INSERT INTO inscripcion (idConcurso, idAspirante, fechaInscripcion)
+                        SELECT %s, %s, %s  -- Asegúrate de usar un formato de fecha válido
+                        WHERE NOT EXISTS (
+                            SELECT 1 FROM inscripcion 
+                            WHERE idConcurso = %s
+                            AND idAspirante = %s
+                            AND fechaInscripcion = %s  -- Asegúrate de que la fecha coincida
+                        );"""
+            cur.execute(sql, (idConcurso, idAspirante, fecha_actual, idConcurso, idAspirante, fecha_actual))
+            self.conexion.commit()
+            messagebox.showinfo("Éxito", "Usted se ha inscrito en el concurso con ID: "+str(idConcurso))
         except:
-            return ("No se encontro ID",)
+            messagebox.showinfo("ERROR", "No se pudó realizar la inscripcion")
         finally:
-                cur.close() 
-                
-    #Obtiene una dupla con el area diciplinar y titulacion minima del perfil apartir de un ID concurso
-    def get_perfiles_concurso(self, idConcurso):    
-        try:
-            cur = self.conexion.cursor()
-            sql = """SELECT perfil.areaDisciplinar, perfil.titulacionRequerida FROM 
-		            perfil INNER JOIN concurso ON perfil.idPerfil = concurso.idPerfil
-                    where concurso.idConcurso = %s"""
-            cur.execute(sql, (idConcurso,))
-            return cur.fetchall()[0]
-            miConexion.close()
-        except:
-            return ("No se encontraron perfiles","No se encontraron perfiles")
-        finally:
-                cur.close() 
+            cur.close()
     
-    #Obtiene en forma de String el estao de un concurso apartir de su id  
-    def get_estado_concurso(self, idConcurso):
+    #Regresa el idConcurso apartir de una convocatoria y un cargo
+    def encontrar_idConcurso(self, idConvocatoria, nombreCargo):
         try:
             cur = self.conexion.cursor()
-            sql = """SELECT estado FROM concurso
-                    WHERE idConcurso = %s"""
-            cur.execute(sql, (idConcurso,))
+            sql = """SELECT concurso.idConcurso 
+            FROM cargo INNER JOIN concurso ON concurso.idCargo = cargo.idCargo
+		    INNER JOIN convocatoria ON convocatoria.idConvocatoria = concurso.idConvocatoria
+            WHERE convocatoria.idConvocatoria = %s AND cargo.nombreCargo = %s"""
+            cur.execute(sql, (idConvocatoria, nombreCargo))
             return cur.fetchall()[0][0]
             miConexion.close()
         except:
-            return "---"
+            return "NULL"
         finally:
-                cur.close()       
-    
-    #Obtiene una dupla con la fecha de inicio y decha de hoja de vida de un concurso mediante su id
-    def get_fecha_inicio_hojavida_concurso(self, idConcurso):
+                cur.close()
+        
+    #Regresa todos los datos de una publicacion de una convocatoria
+    # (idPublicacion, tituloPublicacion, textoPublicacion, imagenPublicacion, idConvocatoria, archivoPublicacion)
+    def get_datos_publicaciones(self, convocatoria):
         try:
             cur = self.conexion.cursor()
-            sql = """SELECT cronogramaactividades.fechaInicio, cronogramaactividades.fechaHojasDeVida FROM 
-		            concurso INNER JOIN cronogramaactividades On concurso.idCronograma = cronogramaactividades.idCronograma
-                    where concurso.idConcurso = %s"""
-            cur.execute(sql, (idConcurso,))
+            sql = """SELECT publicacion.* FROM publicacion 
+                    INNER JOIN convocatoria ON convocatoria.idConvocatoria = publicacion.idConvocatoria
+                    WHERE convocatoria.idConvocatoria = %s"""
+            cur.execute(sql, (convocatoria, ))
             return cur.fetchall()[0]
             miConexion.close()
         except:
-            return ("No se encontraron fechas", "No se encontraron fechas")
+            return "NULL"
         finally:
-                cur.close()                 
+                cur.close() 
+  
+  
+    def obtener_datos(self, id_concurso):
+        try:
+            # Consulta fija con el filtro en la tabla listadeelegibles
+            query = "SELECT * FROM listadeelegibles WHERE idConcurso = %s"
+            cur = self.conexion.cursor()
+            cur.execute(query, (id_concurso,))
+            datos = cur.fetchall()
+            columnas = [i[0] for i in cur.description]
+            return columnas, datos
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al obtener datos: {e}")
+            return None, None
+
+    def generar_pdf_desde_tabla(self, id_concurso):
+        # Crear instancia de la clase de conexión
+        conexion = MiConexion()
+        columnas, datos = conexion.obtener_datos(id_concurso)
+        
+        if columnas is None or datos is None:
+            return  # Salir si hay un error al obtener datos
+
+        # Crear el PDF
+        pdf = FPDF()
+        pdf.set_auto_page_break(auto=True, margin=15)
+        pdf.add_page()
+        pdf.set_font('Arial', 'B', 12)
+
+        # Agregar título al PDF
+        pdf.cell(200, 10, f'Tabla listadeelegibles - idConcurso {id_concurso}', ln=True, align='C')
+
+        # Agregar los encabezados de la tabla
+        pdf.set_font('Arial', 'B', 10)
+        for col in columnas:
+            pdf.cell(40, 10, col, 1, 0, 'C')
+        pdf.ln()
+
+        # Agregar los datos de la tabla
+        pdf.set_font('Arial', '', 10)
+        for fila in datos:
+            for dato in fila:
+                pdf.cell(40, 10, str(dato), 1, 0, 'C')
+            pdf.ln()
+
+        # Guardar el archivo PDF
+        pdf.output("reporte.pdf")
+
+        # Cerrar la conexión a la base de datos
+        messagebox.showinfo("Éxito", f'El PDF se ha generado correctamente: "reporte.pdf')
+               
 
     
     def anade_usuario(self, mode, nombre, ciudad, apellido1, apellido2, usuario, contrasena, nivelAcceso):
