@@ -254,5 +254,4 @@ class AbrirConvocatoria(CTkFrame):
 
 
 
-
     
