@@ -3,6 +3,8 @@ import tkinter as tk
 from PIL import Image
 from Utilidades import *
 import PantallaPrincipalEmpleado, PantallaPerfil
+from conectarMySql import *
+from tkinter import filedialog
 
 
 class FinalizarConvocatoria (CTkFrame):
@@ -89,43 +91,105 @@ class FinalizarConvocatoria (CTkFrame):
 
         #Paneles Colapsables - 1
 
-        panelColapsable1 = CollapsiblePanel(panelScrollable, "nombre_convocatoria")
-        panelColapsable1.pack(anchor = "nw",fill = "x", pady = 5)
+        conexion = MiConexion()
 
-        panelNombreImagen = CTkFrame(panelColapsable1.content_frame, fg_color = "transparent", bg_color= "transparent", corner_radius=16)
-        panelNombreImagen.pack(anchor = "nw",fill = "x", pady = 5)
+        # Supongamos que panelScrollable es el contenedor donde agregarás los paneles
+        for convocatoriaVigente in conexion.get_convocatorias_vigentes():
+            # Crear un panel para cada convocatoria
+            panel = panelColapsableConvocatoria(panelScrollable, nombreConvocatoria=convocatoriaVigente[1], idConvocatoria= convocatoriaVigente[0])
+            panel.pack(anchor="nw", fill="x", pady=10)
+
+
+
+
+
+        
+
+
+
+class panelColapsableConvocatoria(CTkFrame):
+
+    def __init__(self, parent, nombreConvocatoria, idConvocatoria):
+        super().__init__(parent, fg_color="white") 
+
+        self.conexion = MiConexion()
+        self.archivo_seleccionado = None  # Variable para guardar la ruta del archivo
+        self.idConvocatoria = idConvocatoria
+
+        panelColapsable1 = CollapsiblePanel(self, nombreConvocatoria)
+        panelColapsable1.pack(anchor="nw", fill="x", pady=5)
+
+        panelNombreImagen = CTkFrame(panelColapsable1.content_frame, fg_color="transparent", bg_color="transparent", corner_radius=16)
+        panelNombreImagen.pack(anchor="nw", fill="x", pady=5)
 
         nombrePublicacion = mediumText(panelNombreImagen, "Nombre Publicación")
-        nombrePublicacion.pack(side = "left", padx = 50)
+        nombrePublicacion.pack(side="left", padx=50)
 
         imagenPubliacion = mediumText(panelNombreImagen, "Imagen Publicación")
-        imagenPubliacion.pack(side = "right", padx = 100)
+        imagenPubliacion.pack(side="right", padx=100)
 
-        panelDescripcion = CTkFrame(panelColapsable1.content_frame, fg_color = "transparent", bg_color= "transparent", corner_radius=16)
-        panelDescripcion.pack(anchor = "nw",fill = "x", pady = 5)
+        panelDescripcion = CTkFrame(panelColapsable1.content_frame, fg_color="transparent", bg_color="transparent", corner_radius=16)
+        panelDescripcion.pack(anchor="nw", fill="x", pady=5)
 
-        entradaNombre = CTkEntry(panelDescripcion, width = 500, height = 50, corner_radius= 16, border_width=0, fg_color= "white", font = (("Labrada", 20)), justify = "left")
-        entradaNombre.pack(side = "left", pady = 10, padx = 50)
+        self.entradaNombre = CTkEntry(panelDescripcion, width=500, height=50, corner_radius=16, border_width=0, fg_color="white", font=(("Labrada", 20)), justify="left")
+        self.entradaNombre.pack(side="left", pady=10, padx=50)
 
-        botonSubir1 = botonAccion(panelDescripcion, "Subir Nuevo Archivo", 20, "verde", 320, 34, lambda: None)
-        botonSubir1.pack(side = "right", padx = 20)
+        # Botón para seleccionar archivo
+        botonSubir1 = botonAccion(panelDescripcion, "Subir Nuevo Archivo", 20, "verde", 320, 34, self.seleccionar_archivo)
+        botonSubir1.pack(side="right", padx=20)
 
         iconoSubir1 = icono(panelDescripcion, "UploadIcon1", 30, 30)
-        iconoSubir1.pack(side = "right", padx = 10)        
+        iconoSubir1.pack(side="right", padx=10)        
 
         textoPublicacion = mediumText(panelColapsable1.content_frame, "Texto Publicación")
-        textoPublicacion.pack(anchor = "nw", padx= 60)
+        textoPublicacion.pack(anchor="nw", padx=60)
 
-        entradaTexto = CTkEntry(panelColapsable1.content_frame, width = 1000, height = 120, corner_radius= 16, border_width=0, fg_color= "white", font = (("Labrada", 20)), justify = "left")
-        entradaTexto.pack(anchor = "nw", padx = 70, pady = 10)
+        self.entradaTexto = CTkEntry(panelColapsable1.content_frame, width=1000, height=120, corner_radius=16, border_width=0, fg_color="white", font=(("Labrada", 20)), justify="left")
+        self.entradaTexto.pack(anchor="nw", padx=70, pady=10)
 
-        #Botones
+        # Botones
 
-        panelBotones = CTkFrame(panelColapsable1.content_frame, fg_color = "transparent")
-        panelBotones.pack(anchor = "nw", fill = "x", pady = 30)
+        panelBotones = CTkFrame(panelColapsable1.content_frame, fg_color="transparent")
+        panelBotones.pack(anchor="nw", fill="x", pady=30)
 
-        botonDesclararDesierto = botonAccion(panelBotones, "Declarar Desierto", 33, "rojo", 380, 70, lambda: None)
-        botonDesclararDesierto.pack(side = "left", padx = 40)
+        self.botonDesclararDesierto = botonAccion(panelBotones, "Declarar Desierto", 33, "rojo", 380, 70, lambda: self.declararConvocatoriaDesierta())
+        self.botonDesclararDesierto.pack(side="left", padx=40)
 
-        botonPublicar = botonAccion(panelBotones, "Publicar Resultados", 33, "verde", 380, 70, lambda: None)
-        botonPublicar.pack(side = "right", padx = 40)
+        self.botonPublicar = botonAccion(panelBotones, "Publicar Resultados", 33, "verde", 380, 70, lambda: self.finalizarConvocatoria(self.idConvocatoria))
+        self.botonPublicar.pack(side="right", padx=40)
+
+    def seleccionar_archivo(self):
+        # Abrir el explorador de archivos
+        ruta_archivo = filedialog.askopenfilename(
+            title="Seleccionar archivo",
+            filetypes=[("Todos los archivos", "*.*"), ("PDF Files", "*.pdf"), ("Imágenes", "*.jpg;*.png;*.jpeg")]
+        )
+
+        if ruta_archivo:  # Verificar si se seleccionó un archivo
+            self.archivo_seleccionado = ruta_archivo
+            print(f"Archivo seleccionado: {self.archivo_seleccionado}")
+            messagebox.showinfo("Archivo Seleccionado", f"Archivo seleccionado:\n{self.archivo_seleccionado}")
+
+
+    def finalizarConvocatoria(self, idConvocatoria):
+        # Validar que los campos no estén vacíos
+        if not self.entradaNombre.get().strip() or not self.entradaTexto.get().strip() or not self.archivo_seleccionado:
+            messagebox.showerror("Error", "Todos los campos deben estar llenos antes de finalizar la convocatoria.")
+            return  # Salir si algún campo está vacío
+
+        # Si los campos son válidos, ejecutar la acción
+        conexion = MiConexion()
+        conexion.finalizarConvocatoria(self.entradaNombre.get(), self.entradaTexto.get(), self.archivo_seleccionado, idConvocatoria)
+        self.pack_forget()
+
+
+    def declararConvocatoriaDesierta(self, idConvocatoria):
+        # Validar que los campos no estén vacíos
+        if not self.entradaNombre.get().strip() or not self.entradaTexto.get().strip() or not self.archivo_seleccionado:
+            messagebox.showerror("Error", "Todos los campos deben estar llenos antes de declarar la convocatoria desierta.")
+            return  # Salir si algún campo está vacío
+
+        # Si los campos son válidos, ejecutar la acción
+        conexion = MiConexion()
+        conexion.declararConvocatoriaDesierta(self.entradaNombre.get(), self.entradaTexto.get(), self.archivo_seleccionado, idConvocatoria)
+        self.pack_forget()
