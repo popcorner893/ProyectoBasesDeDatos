@@ -1045,6 +1045,140 @@ class MiConexion:
         except Exception as e:
             self.conexion.rollback()
             messagebox.showerror("Error", "No se encontró el Empleado")
+    def get_inscripciones_por_calificar(self, idEmpleado):
+
+        try:
+            cur = self.conexion.cursor()
+            sql = """SELECT Cargo.nombreCargo AS nombreCargo, Aspirante.nombre AS nombreAspirante, Aspirante.apellido1 AS apellidoAspirante, Aspirante.apellido2 AS apellidoaspirante2, Aspirante.idAspirante, concurso.idConcurso
+              FROM 
+              Empleado JOIN ComiteEmpleado ON Empleado.idEmpleado = ComiteEmpleado.idEmpleado 
+              JOIN ComiteEvaluacion ON ComiteEmpleado.idComite = ComiteEvaluacion.idComite 
+              JOIN Concurso ON ComiteEvaluacion.idComite = Concurso.idComite 
+              JOIN Cargo ON Concurso.idCargo = Cargo.idCargo 
+              JOIN Inscripcion ON Concurso.idConcurso = Inscripcion.idConcurso 
+              JOIN Aspirante ON Inscripcion.idAspirante = Aspirante.idAspirante 
+              WHERE Empleado.idEmpleado = %s and Concurso.estado = "En curso" """
+            cur.execute(sql, (idEmpleado,))
+            return cur.fetchall()
+            miConexion.close()
+        except:
+            return "Esto no puede pasar jasjasj"
+        finally:
+                cur.close() 
+
+
+    def anadir_a_lista_elegibles(self, idConcurso, idAspirante, puntaje):
+        cur = self.conexion.cursor()
+
+        try:
+            # Inserción en la tabla listadeelegibles
+            query_lista_elegibles = """
+                INSERT INTO listadeelegibles (idConcurso, idResolucion, idAspirante, puntaje)
+                VALUES (%s, NULL, %s, %s)
+            """
+            cur.execute(query_lista_elegibles, (idConcurso, idAspirante, puntaje))
+            
+            # Confirmar los cambios
+            self.conexion.commit()
+            messagebox.showinfo("Éxito", "Entrada añadida a la lista de elegibles correctamente")
+        
+        except Exception as e:
+            # Revertir los cambios si algo falla
+            self.conexion.rollback()
+            messagebox.showerror("Error", f"Error al añadir a la lista de elegibles: {e}")
+            print(f"Error al añadir a la lista de elegibles: {e}")
+        
+        finally:
+            cur.close()
+
+
+    def get_convocatorias_vigentes(self):
+        cur = self.conexion.cursor()
+
+        try:
+            # Consulta para obtener las convocatorias vigentes
+            query_vigentes = """
+                SELECT c.idConvocatoria, c.nombreConvocatoria, c.idCalendario, c.idAcuerdo, c.imagenConvocatoria
+                FROM Convocatoria c
+                JOIN CalendarioConvocatoria cal ON c.idCalendario = cal.idCalendario
+                WHERE CURDATE() BETWEEN cal.fechaInicio AND cal.fechaFin
+            """
+            cur.execute(query_vigentes)
+
+            # Retornar las convocatorias vigentes
+            return cur.fetchall()
+
+        except Exception as e:
+            # Manejar errores y revertir cambios si es necesario
+            self.conexion.rollback()
+            messagebox.showerror("Error", f"Error al obtener las convocatorias vigentes: {e}")
+            print(f"Error al obtener las convocatorias vigentes: {e}")
+
+        finally:
+            cur.close()
+
+
+    
+    def finalizarConvocatoria(self, tituloPublicacion, textoPublicacion, imagenPublicacion, idConvocatoria):
+        cur = self.conexion.cursor()
+
+
+        try:
+            # Inserción en la tabla Aspirante
+            query_publicacion = """
+                INSERT INTO publicacion (tituloPublicacion, textoPublicacion, imagenPublicacion, idConvocatoria)
+                VALUES (%s, %s, %s, %s)
+            """
+            cur.execute(query_publicacion, (tituloPublicacion, textoPublicacion, imagenPublicacion, idConvocatoria))
+                       
+            
+            # Confirmar los cambios
+            self.conexion.commit()
+            messagebox.showinfo("Éxito", "Publicación Creada Correctamente")
+        
+        except Exception as e:
+            # Revertir los cambios si algo falla
+            self.conexion.rollback()
+            print(f"Error crear la publicación:  {e}")
+
+
+        cur.close()
+
+
+    def declararConvocatoriaDesierta(self, idConvocatoria, tituloPublicacion, textoPublicacion, imagenPublicacion):
+        cur = self.conexion.cursor()
+
+        try:
+            # Inserción en la tabla publicacion
+            query_publicacion = """
+                INSERT INTO publicacion (tituloPublicacion, textoPublicacion, imagenPublicacion, idConvocatoria)
+                VALUES (%s, %s, %s, %s)
+            """
+            cur.execute(query_publicacion, (tituloPublicacion, textoPublicacion, imagenPublicacion, idConvocatoria))
+            
+            # Actualización del campo 'desierto' en la tabla convocatoria
+            query_actualizar_desierto = """
+                UPDATE convocatoria
+                SET desierto = 1
+                WHERE idConvocatoria = %s
+            """
+            cur.execute(query_actualizar_desierto, (idConvocatoria,))
+            
+            # Confirmar los cambios
+            self.conexion.commit()
+            messagebox.showinfo("Éxito", "Convocatoria declarada desierta correctamente.")
+
+        except Exception as e:
+            # Revertir los cambios si algo falla
+            self.conexion.rollback()
+            messagebox.showerror("Error", f"Error al declarar la convocatoria desierta: {e}")
+            print(f"Error al declarar la convocatoria desierta: {e}")
+
+        finally:
+            cur.close() 
+
+
+
 
 
 
