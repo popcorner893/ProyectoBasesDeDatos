@@ -2,17 +2,18 @@ from customtkinter import *
 import tkinter as tk
 from PIL import Image
 from Utilidades import *
-import PantallaPrincipalEmpleado, PantallaPerfil
+import PantallaPrincipalEmpleado, PantallaPerfil, Convocatoria, conectarMySql, Login
+import tkinter.messagebox as messagebox
 
 
 class AnadirMiembro(CTkFrame):
 
 
-    def __init__(self, parent, controller):
+    def __init__(self, parent, idComite):
         
         super().__init__(parent, fg_color="white") 
 
-        
+        self.mi_conexion = conectarMySql.MiConexion()
         self.columnconfigure((0,1), weight=1)
         self.rowconfigure(0, weight=1)
 
@@ -63,15 +64,15 @@ class AnadirMiembro(CTkFrame):
 
 
         #Ícono para volver atrás
-        iconBack = CTkImage(dark_image= Image.open("BackSymbol1.png"), size = (51,51))
-        img_lab1 = CTkButton(panelUsuario, image=iconBack, text="", bg_color="white", fg_color="white", width=51, height=51, hover_color = "white", command=lambda: self.controller.show_frame(PantallaPrincipalEmpleado.MenuPrincipalUsuario))
-        img_lab1.pack(side = "left", padx = 20, pady = 10)
+        self.iconBack = CTkImage(dark_image= Image.open("BackSymbol1.png"), size = (51,51))
+        self.img_lab1 = CTkButton(panelUsuario, image=self.iconBack, text="", bg_color="white", fg_color="white", width=51, height=51, hover_color = "white")
+        self.img_lab1.pack(side = "left", padx = 20, pady = 10)
 
 
         #Tarjeta de Usuario
 
 
-        nombreUsuario = CTkButton(panelUsuario, text = "Usuario", font=("Labrada", 30), bg_color="white", fg_color="white", text_color= "black", hover_color="white", command = lambda: self.controller.show_frame(PantallaPerfil.PantallaPerfilEmpleado))
+        nombreUsuario = CTkButton(panelUsuario, text = f"{Login.sesionActual.sesionActualEmpleado.username}", font=("Labrada", 30), bg_color="white", fg_color="white", text_color= "black", hover_color="white")
         imagenUsuario = CTkImage(dark_image= Image.open("IconoUsuarioEjemplo.png"), size = (53,53))
         img_lab2 = CTkLabel(panelUsuario, image=imagenUsuario, text="")   
 
@@ -105,5 +106,16 @@ class AnadirMiembro(CTkFrame):
 
         #Botón para Enviar
 
-        botonAnadir = botonAccion(panelPrincipal, "Añadir al Comité de Evaluación", 20, "verde", 360, 35, lambda: None)
+        botonAnadir = botonAccion(panelPrincipal, "Añadir al Comité de Evaluación", 20, "verde", 360, 35, lambda: Anadir())
         botonAnadir.pack(anchor = "nw", padx = 30, pady = 20)
+
+        def Anadir():
+            idEmp = entradaTexto.get()
+            if not idEmp.strip():
+                messagebox.showerror("Error", "Ingrese un empleado")
+            else:
+                idNivelAcceso = self.mi_conexion.hallar_nivel_acceso(idEmp)
+                if idNivelAcceso == 3:
+                    self.mi_conexion.anadir_comite_empleado(idComite, idEmp)
+                else:
+                    messagebox.showerror("Error", "El empleado no hace parte del comite de evaluación") 
