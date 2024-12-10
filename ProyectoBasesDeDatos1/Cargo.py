@@ -2,31 +2,23 @@ import customtkinter as ctk
 import tkinter as tk
 from PIL import Image
 from Utilidades import *
-import PantallaPrincipalEmpleado, PantallaPerfil, Convocatoria, conectarMySql
+import PantallaPrincipalEmpleado, PantallaPerfil, Convocatoria, conectarMySql, Login
 import tkinter.messagebox as messagebox
 
 
 class AnadirCargo(CTkFrame):
 
 
-    def __init__(self, parent, controller):
+    def __init__(self, parent, idConvocatoria, idComite):
         
-        super().__init__(parent, fg_color="white") 
+        super().__init__(parent, fg_color="white")
 
-
-        self.controller = controller
+        self.idConvocatoria = idConvocatoria
+        self.idComite = idComite
 
         self.mi_conexion = conectarMySql.MiConexion()
-
         self.columnconfigure((0,1), weight=1)
         self.rowconfigure(0, weight=1)
-
-        lista_idEscuela = []
-        lista_idCargo = []
-        lista_idPerfil = []
-        lista_idCalendario = []
-
-
 
         # Crear canvas para manejar la imagen y el texto
         canvas = tk.Canvas(self, width=640, height=721, highlightthickness=0)
@@ -74,14 +66,14 @@ class AnadirCargo(CTkFrame):
 
         #Ícono para volver atrás
         iconBack = CTkImage(dark_image= Image.open("BackSymbol1.png"), size = (51,51))
-        img_lab1 = CTkButton(panelUsuario, image=iconBack, text="", bg_color="white", fg_color="white", width=51, height=51, hover_color = "white", command=lambda: self.controller.show_frame(Convocatoria.AbrirConvocatoria))
+        img_lab1 = CTkButton(panelUsuario, image=iconBack, text="", bg_color="white", fg_color="white", width=51, height=51, hover_color = "white")
         img_lab1.pack(side = "left", padx = 20, pady = 10)
 
 
         #Tarjeta de Usuario
 
 
-        nombreUsuario = CTkButton(panelUsuario, text = "Usuario", font=("Labrada", 30), bg_color="white", fg_color="white", text_color= "black", hover_color="white", command = lambda: self.controller.show_frame(PantallaPerfil.PantallaPerfilEmpleado))
+        nombreUsuario = CTkButton(panelUsuario, text = f"{Login.sesionActual.sesionActualEmpleado.username}", font=("Labrada", 30), bg_color="white", fg_color="white", text_color= "black", hover_color="white", command = lambda: self.controller.show_frame(PantallaPerfil.PantallaPerfilEmpleado))
         imagenUsuario = CTkImage(dark_image= Image.open("IconoUsuarioEjemplo.png"), size = (53,53))
         img_lab2 = CTkLabel(panelUsuario, image=imagenUsuario, text="")   
 
@@ -200,7 +192,7 @@ class AnadirCargo(CTkFrame):
             fechaHDVQuery = entradaFecha3.fecha_seleccionada
             fechaPsiQuery = entradaFecha4.fecha_seleccionada
             fechaSDQuery = entradaFecha5.fecha_seleccionada
-            fechaEntQuery = entradaFecha6.fecha_seleccionada 
+            fechaEntQuery = entradaFecha6.fecha_seleccionada   
 
             if not cargoQuery.strip() or not escuelaQuery.strip() or not DisciplinaQuery.strip() or not titulacionQuery.strip() or not expQuery.strip() or not areaQuery.strip() or not modalidadQuery.strip() or not fechaIniCQuery or not fechaFinCQuery or not fechaHDVQuery or not fechaPsiQuery or not fechaSDQuery or not fechaEntQuery:
                 messagebox.showerror("Error", "Alguno de los campos se encuentra vacío")
@@ -212,11 +204,10 @@ class AnadirCargo(CTkFrame):
                 idCargo = self.mi_conexion.obtener_o_insertar_cargo(cargoQuery, idEscuela)
                 idPerfil = self.mi_conexion.obtener_o_insertar_perfil(DisciplinaQuery,titulacionQuery,expQuery,areaQuery, compromisoQuery, idModalidad)
                 idCalendario = self.mi_conexion.obtener_o_insertar_cronograma(fechaIniCQuery,fechaHDVQuery, fechaPsiQuery, fechaSDQuery, fechaEntQuery, fechaFinCQuery)
-                
-                lista_idEscuela.append(idEscuela)
-                lista_idCargo.append(idCargo)
-                lista_idPerfil.append(idPerfil)
-                lista_idCalendario.append(idCalendario)
+
+
+                self.mi_conexion.insertar_datos_concurso(idCargo,idPerfil,idCalendario,idConvocatoria,idComite)
+
 
                 nombreCargo.entradaTexto.delete(0, 'end')
                 escuela.entradaTexto.delete(0, 'end')
@@ -233,4 +224,7 @@ class AnadirCargo(CTkFrame):
                 entradaFecha4.limpiar_fecha()
                 entradaFecha5.limpiar_fecha()
                 entradaFecha6.limpiar_fecha()
+
+        return
+
 
