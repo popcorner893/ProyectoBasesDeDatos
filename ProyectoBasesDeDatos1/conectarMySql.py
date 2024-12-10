@@ -821,13 +821,13 @@ class MiConexion:
 
             cur.close()
 
-    def insertar_datos_concurso(self, idCargo, idPerfil, idCronograma, idConvocatoria, idComite, estado):
+    def insertar_datos_concurso(self, idCargo, idPerfil, idCronograma, idConvocatoria, idComite):
         try:
             cur = self.conexion.cursor()
             cur.execute('''
-            INSERT INTO Concurso (idPerfil, idCargo, idCronograma, idConvocatoria, idComite, estado)
-            VALUES (%s, %s, %s, %s, %s, %s)
-            ''', (idCargo, idPerfil, idCronograma, idConvocatoria, idComite, estado))
+            INSERT INTO Concurso (idCargo, idPerfil, idCronograma, idConvocatoria, idComite, estado)
+            VALUES (%s, %s, %s, %s, %s, "En curso")
+            ''', (idCargo, idPerfil, idCronograma, idConvocatoria, idComite))
             self.conexion.commit()
             idConcurso = cur.lastrowid
             cur.close()
