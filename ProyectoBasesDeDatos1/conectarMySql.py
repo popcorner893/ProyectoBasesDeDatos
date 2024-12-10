@@ -1004,6 +1004,46 @@ class MiConexion:
             messagebox.showerror("Error", f"Error al procesar el perfil: {e}")
         finally:
             cur.close()
+		
+    def insertar_datos_comite(self):
+        try:
+            cur = self.conexion.cursor()   
+            cur.execute('''INSERT INTO comiteevaluacion (nombreComite)
+            VALUES (%s)
+            ''', ("Comite"))
+            self.conexion.commit()
+            idComite = cur.lastrowid  # Obtener el id del último acuerdo insertado
+            cur.close()
+            return idComite
+        except Exception as e:
+            self.conexion.rollback()
+            messagebox.showerror("Error", "Error al insertar convocatoria")
+
+    def hallar_nivel_acceso(self, idEmpleado):
+        try:
+            cur = self.conexion.cursor()
+            sql_select = """SELECT idNivelAcceso FROM empleado WHERE idEmpleado = %s"""
+            cur.execute(sql_select, (idEmpleado))
+            resultado = cur.fetchone()
+            if resultado:
+            # Devolver el ID del nivel acceso
+                return resultado[0]
+        except Exception as e:
+            self.conexion.rollback()
+            messagebox.showerror("Error", "No se encontró el Empleado")
+
+    def anadir_comite_empleado(self, idComite, idEmpleado):
+        try:
+            cur = self.conexion.cursor()
+            sql_insert = '''
+                INSERT INTO comiteempleado (idComite, idEmpleado)
+                VALUES (%s, %s)
+                '''
+            cur.execute(sql_insert, (idComite, idEmpleado))
+            self.conexion.commit()
+        except Exception as e:
+            self.conexion.rollback()
+            messagebox.showerror("Error", "No se encontró el Empleado")
 
 
 
